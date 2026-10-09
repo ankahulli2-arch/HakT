@@ -1,0 +1,345 @@
+{
+ "k": 10,
+ "pairs": [
+  {
+   "need": "нужен бэкенд-разработчик junior: python, fastapi, postgresql, docker",
+   "specialization_code": "backend",
+   "min_grade": "junior",
+   "stack": [
+    "python",
+    "fastapi",
+    "postgresql",
+    "docker"
+   ],
+   "relevant": [
+    "0eea52ef-f1ba-5224-b6d9-1bfbbe3bc799",
+    "71639fcf-ff94-5b99-8b30-1cb9907ac2a2",
+    "eed5267f-5ab6-5e2a-a7b6-4cdb7d0925f7",
+    "e28382a8-2927-5cdf-8174-5e07af3ed141",
+    "31e63954-2450-5f70-8b6e-105027057692",
+    "0fd379be-27ba-5961-92e4-c07fd25d9473"
+   ]
+  },
+  {
+   "need": "нужен бэкенд-разработчик middle: python, fastapi, postgresql, docker",
+   "specialization_code": "backend",
+   "min_grade": "middle",
+   "stack": [
+    "python",
+    "fastapi",
+    "postgresql",
+    "docker"
+   ],
+   "relevant": [
+    "0eea52ef-f1ba-5224-b6d9-1bfbbe3bc799",
+    "71639fcf-ff94-5b99-8b30-1cb9907ac2a2",
+    "e28382a8-2927-5cdf-8174-5e07af3ed141",
+    "0fd379be-27ba-5961-92e4-c07fd25d9473",
+    "dd691351-5549-5713-9569-3cd5e7e9d1c9",
+    "43fd5c7a-2384-56fc-b2cb-fd4b3bcd66a5"
+   ]
+  },
+  {
+   "need": "нужен бэкенд-разработчик senior: python, fastapi, postgresql, docker",
+   "specialization_code": "backend",
+   "min_grade": "senior",
+   "stack": [
+    "python",
+    "fastapi",
+    "postgresql",
+    "docker"
+   ],
+   "relevant": [
+    "0eea52ef-f1ba-5224-b6d9-1bfbbe3bc799",
+    "71639fcf-ff94-5b99-8b30-1cb9907ac2a2",
+    "e28382a8-2927-5cdf-8174-5e07af3ed141",
+    "0fd379be-27ba-5961-92e4-c07fd25d9473",
+    "43fd5c7a-2384-56fc-b2cb-fd4b3bcd66a5",
+    "58f6e727-d7f9-5f85-8605-22be246014e1"
+   ]
+  },
+  {
+   "need": "нужен фронтенд-разработчик junior: react, typescript, next.js, css",
+   "specialization_code": "frontend",
+   "min_grade": "junior",
+   "stack": [
+    "react",
+    "typescript",
+    "next.js",
+    "css"
+   ],
+   "relevant": [
+    "360d7c4b-30ea-576a-a6dc-061a75b1c1dd",
+    "8b0b3124-6b9e-5e72-9f01-460c005b1c1e",
+    "1fca6878-bce2-50dd-89a7-6d1c6df8775e",
+    "e89c601a-7336-5c06-ab3b-2e6f1715ff78",
+    "d5ed55db-0e0e-5c32-8aa8-42c7bdb8c934",
+    "53e3ba24-f798-59b8-a026-36585ed888db"
+   ]
+  },
+  {
+   "need": "нужен фронтенд-разработчик middle: react, typescript, next.js, css",
+   "specialization_code": "frontend",
+   "min_grade": "middle",
+   "stack": [
+    "react",
+    "typescript",
+    "next.js",
+    "css"
+   ],
+   "relevant": [
+    "1fca6878-bce2-50dd-89a7-6d1c6df8775e",
+    "e89c601a-7336-5c06-ab3b-2e6f1715ff78",
+    "d5ed55db-0e0e-5c32-8aa8-42c7bdb8c934",
+    "53e3ba24-f798-59b8-a026-36585ed888db",
+    "44631747-5ce2-5a1f-bb2f-4da38e77bb37",
+    "28190a80-535b-565b-9467-8fcb376e5f53"
+   ]
+  },
+  {
+   "need": "нужен фронтенд-разработчик senior: react, typescript, next.js, css",
+   "specialization_code": "frontend",
+   "min_grade": "senior",
+   "stack": [
+    "react",
+    "typescript",
+    "next.js",
+    "css"
+   ],
+   "relevant": [
+    "1fca6878-bce2-50dd-89a7-6d1c6df8775e",
+    "e89c601a-7336-5c06-ab3b-2e6f1715ff78",
+    "d5ed55db-0e0e-5c32-8aa8-42c7bdb8c934",
+    "92abc119-058e-5bce-9286-34924294568e",
+    "77360158-3e74-5a2c-84e4-7a3a2fbc4425",
+    "3ed6f4a9-7bee-5a2b-80de-9e9d7ec9f316"
+   ]
+  },
+  {
+   "need": "нужен ml-инженер junior: python, pytorch, ml, sql",
+   "specialization_code": "ml",
+   "min_grade": "junior",
+   "stack": [
+    "python",
+    "pytorch",
+    "ml",
+    "sql"
+   ],
+   "relevant": [
+    "c8e73ce9-d51d-53f2-bb3e-ea4debdbe056",
+    "712d602d-62aa-5e34-8605-7163c912de02",
+    "cfcde85b-dbb3-594e-9057-633d6f15343c",
+    "39bec8cf-16f9-5258-854e-edf3214d7d15",
+    "267ca6c6-0c75-580c-bb9d-3186b7b268b5",
+    "6283dd0d-4fae-530d-b6df-8c5004894bcf"
+   ]
+  },
+  {
+   "need": "нужен ml-инженер middle: python, pytorch, ml, sql",
+   "specialization_code": "ml",
+   "min_grade": "middle",
+   "stack": [
+    "python",
+    "pytorch",
+    "ml",
+    "sql"
+   ],
+   "relevant": [
+    "267ca6c6-0c75-580c-bb9d-3186b7b268b5",
+    "84f9d4c4-27fd-5533-8ead-1e9310a67b5b",
+    "85269c18-3632-5155-91ef-96121bdae390",
+    "85aaf13a-3cf6-5d20-ba71-a614ea99ce3f",
+    "827e3cbd-3973-5ce5-8398-c917d1c9810e",
+    "00cafa40-6a63-5274-b341-058681c83dc5"
+   ]
+  },
+  {
+   "need": "нужен ml-инженер senior: python, pytorch, ml, sql",
+   "specialization_code": "ml",
+   "min_grade": "senior",
+   "stack": [
+    "python",
+    "pytorch",
+    "ml",
+    "sql"
+   ],
+   "relevant": [
+    "267ca6c6-0c75-580c-bb9d-3186b7b268b5",
+    "85269c18-3632-5155-91ef-96121bdae390",
+    "85aaf13a-3cf6-5d20-ba71-a614ea99ce3f",
+    "d29a64d3-c96d-5f40-bebe-698063eac47f",
+    "ae5795f0-53dd-56c9-9e5b-29e1ff4117d6",
+    "7a2814bf-d49c-5384-b9a9-dcded319af45"
+   ]
+  },
+  {
+   "need": "нужен аналитик данных junior: sql, python, airflow, pandas",
+   "specialization_code": "analytics",
+   "min_grade": "junior",
+   "stack": [
+    "sql",
+    "python",
+    "airflow",
+    "pandas"
+   ],
+   "relevant": [
+    "9f07810a-ef9a-5fa7-8dfe-0063cd932a03",
+    "37b59659-ec8c-553c-9cb8-be4432421b80",
+    "446aebbc-5780-5c3c-945a-5781177185ff",
+    "7c16b61f-0975-54a0-b196-8d20bcb8f9bf",
+    "ab28738f-7d6e-5bbf-8e02-d03c7bd26020",
+    "d44ea97a-88ee-5c3d-8921-175cff320650"
+   ]
+  },
+  {
+   "need": "нужен аналитик данных middle: sql, python, airflow, pandas",
+   "specialization_code": "analytics",
+   "min_grade": "middle",
+   "stack": [
+    "sql",
+    "python",
+    "airflow",
+    "pandas"
+   ],
+   "relevant": [
+    "9f07810a-ef9a-5fa7-8dfe-0063cd932a03",
+    "37b59659-ec8c-553c-9cb8-be4432421b80",
+    "446aebbc-5780-5c3c-945a-5781177185ff",
+    "7c16b61f-0975-54a0-b196-8d20bcb8f9bf",
+    "d44ea97a-88ee-5c3d-8921-175cff320650",
+    "25a56364-4b68-523f-80ed-21ea75033b5d"
+   ]
+  },
+  {
+   "need": "нужен аналитик данных senior: sql, python, airflow, pandas",
+   "specialization_code": "analytics",
+   "min_grade": "senior",
+   "stack": [
+    "sql",
+    "python",
+    "airflow",
+    "pandas"
+   ],
+   "relevant": [
+    "446aebbc-5780-5c3c-945a-5781177185ff",
+    "c65b8243-52a5-5b2c-b601-417a694e0ebb",
+    "9fae02a1-bb68-5055-b1c8-88ac024066a4",
+    "c3e0f212-d5d9-5872-a936-4eaf387437be",
+    "e478c8c4-aff4-5a6f-ad4a-b9c23f92397a",
+    "25e5a450-5cb1-50d7-9481-45a06ecdf412"
+   ]
+  },
+  {
+   "need": "нужен qa-инженер junior: python, pytest, postman, sql",
+   "specialization_code": "qa",
+   "min_grade": "junior",
+   "stack": [
+    "python",
+    "pytest",
+    "postman",
+    "sql"
+   ],
+   "relevant": [
+    "80813f05-3916-5def-bc30-2c480be2f477",
+    "8b3ec50e-afb1-5825-97f6-926cebbf3e7a",
+    "a8c0a766-cc55-54a1-814c-c6ddf50ca483",
+    "7a58314c-163f-5de6-bd3b-1acf777fe4f1",
+    "bb85bddc-1a12-51a8-9a94-4cd08a2ed016",
+    "bee7c922-62c9-5535-8ec3-104bb6c64ff0"
+   ]
+  },
+  {
+   "need": "нужен qa-инженер middle: python, pytest, postman, sql",
+   "specialization_code": "qa",
+   "min_grade": "middle",
+   "stack": [
+    "python",
+    "pytest",
+    "postman",
+    "sql"
+   ],
+   "relevant": [
+    "80813f05-3916-5def-bc30-2c480be2f477",
+    "bee7c922-62c9-5535-8ec3-104bb6c64ff0",
+    "7627cb5c-8a2d-5b55-9b1b-3fb36527639b",
+    "3dc91cee-eed5-56b1-ab17-2f40dec5599d",
+    "043bd47d-6033-5cb9-a6dc-7a4c4d370410",
+    "1eadfb35-5fc0-588d-8e91-27bae3165f48"
+   ]
+  },
+  {
+   "need": "нужен qa-инженер senior: python, pytest, postman, sql",
+   "specialization_code": "qa",
+   "min_grade": "senior",
+   "stack": [
+    "python",
+    "pytest",
+    "postman",
+    "sql"
+   ],
+   "relevant": [
+    "80813f05-3916-5def-bc30-2c480be2f477",
+    "bee7c922-62c9-5535-8ec3-104bb6c64ff0",
+    "043bd47d-6033-5cb9-a6dc-7a4c4d370410",
+    "6e38b4a0-72d2-51b9-b942-45ab593fe747"
+   ]
+  },
+  {
+   "need": "нужен devops-инженер junior: kubernetes, docker, terraform, nginx",
+   "specialization_code": "devops",
+   "min_grade": "junior",
+   "stack": [
+    "kubernetes",
+    "docker",
+    "terraform",
+    "nginx"
+   ],
+   "relevant": [
+    "dc777899-52c7-5302-b86d-ffb6db898ad9",
+    "d6d24313-57da-578e-9ee3-2c4e098a8d3c",
+    "091673a1-cefc-5ee5-a412-f28987275c02",
+    "93661318-7b48-5008-ba1b-8cb35672d683",
+    "56c543cc-48d3-506e-9b7f-dc957ba4ef78",
+    "e5cecb37-b985-5290-8c81-1f73fedcbfff"
+   ]
+  },
+  {
+   "need": "нужен devops-инженер middle: kubernetes, docker, terraform, nginx",
+   "specialization_code": "devops",
+   "min_grade": "middle",
+   "stack": [
+    "kubernetes",
+    "docker",
+    "terraform",
+    "nginx"
+   ],
+   "relevant": [
+    "dc777899-52c7-5302-b86d-ffb6db898ad9",
+    "d6d24313-57da-578e-9ee3-2c4e098a8d3c",
+    "091673a1-cefc-5ee5-a412-f28987275c02",
+    "93661318-7b48-5008-ba1b-8cb35672d683",
+    "e5cecb37-b985-5290-8c81-1f73fedcbfff",
+    "f5b7eb38-53d5-5948-b883-0c1330f63bbf"
+   ]
+  },
+  {
+   "need": "нужен devops-инженер senior: kubernetes, docker, terraform, nginx",
+   "specialization_code": "devops",
+   "min_grade": "senior",
+   "stack": [
+    "kubernetes",
+    "docker",
+    "terraform",
+    "nginx"
+   ],
+   "relevant": [
+    "091673a1-cefc-5ee5-a412-f28987275c02",
+    "93661318-7b48-5008-ba1b-8cb35672d683",
+    "f5b7eb38-53d5-5948-b883-0c1330f63bbf",
+    "4f4e6906-abc2-5856-811a-1884f83a74cf",
+    "f226a434-5e0c-5d40-ad39-f384b0b3b4fd",
+    "04e36c26-5b1b-54ce-b53b-0908de00c36a"
+   ]
+  }
+ ]
+}

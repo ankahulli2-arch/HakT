@@ -1,0 +1,8 @@
+*.cmd -text
+*.png -text
+*.jpg -text
+*.pptx -text
+*.ttf -text
+*.woff -text
+*.pdf -text
+*.ico -text
