@@ -207,7 +207,7 @@ function DemoQuiz({ onRegister }: { onRegister: () => void }) {
   };
 
   return (
-    <Card className="w-full max-w-xl lg:self-center">
+    <Card className="w-full max-w-xl">
       <h2 className="text-lg font-bold text-[#3b1f5e]">Попробуйте CAT-тест прямо сейчас</h2>
       <p className="mt-1 text-sm text-gray-500">
         3 задания без регистрации. Сложность подбирается под ваш уровень после каждого ответа —
