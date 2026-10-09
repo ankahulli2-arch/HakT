@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { GET, POST, getRole, saveAuth } from "@/lib/api";
+import { GET, POST, NOCODE_SPECS, getRole, saveAuth } from "@/lib/api";
 import { Button, Card, Field, inputCls } from "@/components/ui";
 
 export default function Landing() {
@@ -58,8 +58,8 @@ export default function Landing() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#3b1f5e] via-[#5e2b8e] to-[#8b5cf6] flex items-center justify-center p-6">
-      <div className="flex w-full max-w-5xl flex-col items-stretch justify-center gap-6 lg:flex-row">
-      <Card className="w-full max-w-md">
+      <div className="flex w-full max-w-6xl flex-col items-stretch justify-center gap-6 lg:flex-row">
+      <Card className="w-full max-w-xl">
         <h1 className="text-xl font-bold text-[#3b1f5e]">Платформа подбора ИТ-специалистов ФСП</h1>
         <p className="mt-1 text-sm text-gray-500">
           Обратная механика: кандидат подтверждает грейд тестом, работодатель приглашает первым.
@@ -163,7 +163,8 @@ function DemoQuiz({ onRegister }: { onRegister: () => void }) {
     setBusy(true);
     setError("");
     try {
-      const r = await POST("/demo/quiz/start", undefined, { spec, language: lang });
+      const r = await POST("/demo/quiz/start", undefined,
+        NOCODE_SPECS.includes(spec) ? { spec } : { spec, language: lang });
       setToken(r.token);
       setItem(r.item);
       setPhase("playing");
@@ -206,7 +207,7 @@ function DemoQuiz({ onRegister }: { onRegister: () => void }) {
   };
 
   return (
-    <Card className="w-full max-w-md lg:self-center">
+    <Card className="w-full max-w-xl lg:self-center">
       <h2 className="text-lg font-bold text-[#3b1f5e]">Попробуйте CAT-тест прямо сейчас</h2>
       <p className="mt-1 text-sm text-gray-500">
         3 задания без регистрации. Сложность подбирается под ваш уровень после каждого ответа —
@@ -215,20 +216,22 @@ function DemoQuiz({ onRegister }: { onRegister: () => void }) {
 
       {phase === "idle" && (
         <div className="mt-4 space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+          <div className={`grid gap-2 ${NOCODE_SPECS.includes(spec) ? "grid-cols-1" : "grid-cols-2"}`}>
             <Field label="Специальность">
               <select className={inputCls} value={spec} onChange={(e) => setSpec(e.target.value)}>
                 {(specs.length > 0 ? specs : [{ code: "backend", name: "Бэкенд-разработчик" }])
                   .map((s: any) => <option key={s.code} value={s.code}>{s.name}</option>)}
               </select>
             </Field>
-            <Field label="Язык заданий">
-              <select className={inputCls} value={lang} onChange={(e) => setLang(e.target.value)}>
-                {[["python", "Python"], ["javascript", "JavaScript"], ["c++", "C++"],
-                  ["c#", "C#"], ["java", "Java"]]
-                  .map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </Field>
+            {!NOCODE_SPECS.includes(spec) && (
+              <Field label="Язык заданий">
+                <select className={inputCls} value={lang} onChange={(e) => setLang(e.target.value)}>
+                  {[["python", "Python"], ["javascript", "JavaScript"], ["c++", "C++"],
+                    ["c#", "C#"], ["java", "Java"]]
+                    .map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                </select>
+              </Field>
+            )}
           </div>
           <Button onClick={start} disabled={busy} className="w-full">
             {busy ? "…" : "Начать демо — 3 задания"}

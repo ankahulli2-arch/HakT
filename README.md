@@ -38,7 +38,7 @@ docker compose up -d --build
 ```
 Стенд: http://localhost:3000 · Swagger: http://localhost:8000/api/docs
 
-Демо-данные (150 кандидатов, 8 специализаций, 28 вакансий) сеятся
+Демо-данные (150 кандидатов, 8 специализаций, 38 вакансий) сеятся
 автоматически при пустой базе:
 ```bash
 curl -X POST "http://localhost:8000/api/admin/seed?reset=true"

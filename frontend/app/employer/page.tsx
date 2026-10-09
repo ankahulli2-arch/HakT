@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DEL, GET, POST, PUT, GRADE_RU, getRole, logout, photoUrl, uploadFile } from "@/lib/api";
+import { DEL, GET, POST, PUT, GRADE_RU, NOCODE_SPECS, getRole, logout, photoUrl, uploadFile } from "@/lib/api";
 import { Badge, Bar, Button, Card, Field, FspAchievements, HistoryBlock, inputCls } from "@/components/ui";
 
 type Tab = "overview" | "vacancies" | "apps" | "tests" | "invites";
@@ -577,12 +577,14 @@ function VacanciesStep({ specs, setSpecs, skills, onDone }: any) {
                   {Object.entries(GRADE_RU).map(([k, ru]) => <option key={k} value={k}>{ru}</option>)}
                 </select>
               </Field>
-              <Field label="Язык заданий в тесте">
-                <select className={inputCls} value={v.code_language || "python"}
-                  onChange={(e) => setParam(code, "code_language", e.target.value)}>
-                  {["python", "javascript", "c++", "c#", "java"].map((l) => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </Field>
+              {!NOCODE_SPECS.includes(code) && (
+                <Field label="Язык заданий в тесте">
+                  <select className={inputCls} value={v.code_language || "python"}
+                    onChange={(e) => setParam(code, "code_language", e.target.value)}>
+                    {["python", "javascript", "c++", "c#", "java"].map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </Field>
+              )}
               <Field label="Навыки (по желанию)">
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {v.stack.map((t: string) => (
@@ -700,7 +702,8 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
       <div className="flex items-center justify-between">
         <h4 className="font-semibold text-[#3b1f5e]">Тест для «{vacancy.title}»</h4>
         <span className="text-xs text-gray-500">
-          язык заданий: {vacancy.code_language || "python"} ·{" "}
+          {!NOCODE_SPECS.includes(vacancy.specialization_code) &&
+            <>язык заданий: {vacancy.code_language || "python"} ·{" "}</>}
           {status === "published" ? "опубликован" : status === "draft" ? "черновик" : status}
         </span>
       </div>

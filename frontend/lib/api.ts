@@ -89,6 +89,7 @@ export const GRADE_RU: Record<string, string> = {
 export const GRADE_RU_GEN: Record<string, string> = {
   junior: "младшего", middle: "среднего", senior: "старшего", lead: "ведущего",
 };
+export const NOCODE_SPECS = ["hr", "office_admin"];
 export const SPEC_RU: Record<string, string> = {
   backend: "бэкенд", frontend: "фронтенд", ml: "ML", analytics: "аналитика",
   qa: "QA", hr: "HR", office_admin: "делопроизводство", devops: "DevOps",
