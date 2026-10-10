@@ -14,4 +14,5 @@ next-env.d.ts
 pgdata/
 *.log
 media/
-presentation/template.pptx
+presentation/
+docs/Документация.md
