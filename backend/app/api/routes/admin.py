@@ -21,7 +21,7 @@ from app.models import (
     UserRole,
     Vacancy,
 )
-from app.services.scoring import fsp_index, theta_to_grade
+from app.services.scoring import fsp_index, theta_to_grade, board_key
 from app.services.testing.scenarios import SCENARIOS, build_bank_items
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -278,8 +278,10 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
             prof.theta_history = [theta]
     await db.flush()
     board: dict[str, dict[str, float]] = {}
+    profs = {p.user_id: p for p in (await db.execute(select(CandidateProfile))).scalars().all()}
     for c in cats:
-        board.setdefault(c.specialization_code, {})[str(c.candidate_id)] = float(c.theta)
+        integ = profs[c.candidate_id].integrity if c.candidate_id in profs else None
+        board.setdefault(c.specialization_code, {})[str(c.candidate_id)] = board_key(c.theta, integ)
     for spec, mapping in board.items():
         try:
             await redis_client.zadd(f"leaderboard:{spec}", mapping)

@@ -42,6 +42,11 @@ def final_score(theta: float | None, integrity: float | None) -> int:
     return int(round(base * 0.9 + honest * 10))
 
 
+def board_key(theta: float, integrity: float | None) -> float:
+    """Порядок в лидерборде: по баллу, при равных баллах — по θ."""
+    return final_score(theta, integrity) + theta / 1000.0
+
+
 def fsp_index(history: list | None) -> float:
     if not history:
         return 0.0

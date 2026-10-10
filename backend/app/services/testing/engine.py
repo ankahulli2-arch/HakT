@@ -18,7 +18,7 @@ from app.models import (
     TestSession,
     TestStatus,
 )
-from app.services.scoring import theta_to_grade, theta_to_score, final_score
+from app.services.scoring import theta_to_grade, theta_to_score, final_score, board_key
 from app.core.redisio import client as redis_client
 from app.services.testing.blueprint import blueprint_pool
 
@@ -599,7 +599,7 @@ async def finish_session(db: AsyncSession, session: TestSession) -> dict:
     try:
         await redis_client.zadd(
             f"leaderboard:{session.specialization_code}",
-            {str(candidate.user_id): session.theta}, gt=True)
+            {str(candidate.user_id): board_key(session.theta, session.integrity)}, gt=True)
     except Exception:
         pass
 

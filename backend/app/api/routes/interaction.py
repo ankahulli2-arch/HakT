@@ -520,25 +520,27 @@ async def candidate_metrics_data(db, candidate) -> list[dict]:
     )).scalars().all()
     out = []
     for cat in cats:
-        total = (await db.execute(
-            select(func.count()).select_from(CandidateCategory)
+        rows = (await db.execute(
+            select(CandidateCategory.theta, CandidateProfile.integrity)
+            .join(CandidateProfile, CandidateProfile.user_id == CandidateCategory.candidate_id)
             .where(CandidateCategory.specialization_code == cat.specialization_code)
-        )).scalar()
-        lower = (await db.execute(
-            select(func.count()).select_from(CandidateCategory)
-            .where(CandidateCategory.specialization_code == cat.specialization_code,
-                   CandidateCategory.theta < cat.theta)
-        )).scalar()
+        )).all()
+        my_score = final_score(cat.theta, candidate.integrity)
+        keys = [(final_score(th, integ), th) for th, integ in rows]
+        mine = (my_score, cat.theta)
+        above = sum(1 for k in keys if k > mine)
+        below = sum(1 for k in keys if k < mine)
+        total = len(keys)
         _, breakdown = compute_score(candidate, [], theta_override=cat.theta)
         out.append({
             "specialization": cat.specialization_code,
             "grade": cat.grade.value,
             "category": f"{cat.specialization_code} · {cat.grade.value}",
-            "score": final_score(cat.theta, candidate.integrity),
-            "rank": (total - lower) if total else 1,
+            "score": my_score,
+            "rank": (above + 1) if total else 1,
             "total": total,
             "candidates_in_category": total,
-            "percentile": round(100.0 * lower / total, 1) if total else 0.0,
+            "percentile": round(100.0 * below / total, 1) if total else 0.0,
             "integrity": round(candidate.integrity, 2) if candidate.integrity is not None else 1.0,
             "breakdown": breakdown,
         })
