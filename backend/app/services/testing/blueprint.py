@@ -113,20 +113,28 @@ async def make_draft(
 
 
 def _autodistractors(correct: str, rng: random.Random, spec_code: str = "") -> list[str]:
-    """Дистракторы для своего вопроса: числа ±, годы, да/нет, иначе словарь предметной области."""
+    """Дистракторы для своего вопроса: тот же формат, что у верного ответа."""
     t = correct.strip()
-    if re.fullmatch(r"-?\d+([.,]\d+)?", t):
-        try:
-            base = float(t.replace(",", "."))
-        except ValueError:
-            return []
-        outs, seen = [], {base}
-        for _ in range(30):
-            delta = base * rng.uniform(0.05, 0.35) * rng.choice([-1, 1])
-            v = round(base + delta, 2 if isinstance(base, float) or "." in t else 0)
-            if v not in seen and len(outs) < 3:
-                outs.append(str(v).replace(".", ",") if "," in t else str(v))
-                seen.add(v)
+    m = re.fullmatch(r"-?\d+(?:[.,]\d{1,3})?", t)
+    if m:
+        dec = (t.split(",")[1] if "," in t
+               else (t.split(".")[1] if "." in t else ""))
+        places = len(dec)
+        sep = "," if "," in t else "."
+        base = float(t.replace(",", "."))
+        step = 10 ** -places
+        cand = [base + d * step for d in (1, -1, 2, -2, 3, -3, 5, -5, 10, -10, 4, -4, 6, -6, 7, -7)]
+        if abs(base) >= 2:
+            cand.append(base * 2)
+        rng.shuffle(cand)
+        outs, seen = [], {t}
+        for v in cand:
+            txt = f"{v:.{places}f}".replace(".", sep)
+            if txt not in seen:
+                outs.append(txt)
+                seen.add(txt)
+            if len(outs) >= 3:
+                break
         return outs
     if re.fullmatch(r"(19|20)\d{2}", t):
         y = int(t)
@@ -152,19 +160,28 @@ async def add_custom_item(
     options: list[str], correct: str,
 ) -> dict:
     rng = random.Random(f"{title}:{correct}")
-    options = [o for o in options if o.strip()]
-    if correct not in options:
+    seen: set[str] = set()
+    src = [o.strip() for o in options if o and o.strip()]
+    options = []
+    for o in src:
+        if o.lower() not in seen:
+            options.append(o)
+            seen.add(o.lower())
+    options = options[:20]
+    correct = correct.strip()
+    if correct.lower() not in seen:
         options.append(correct)
     if len(options) < 4:
-        have = {o.strip().lower() for o in options}
         for d in _autodistractors(correct, rng, bp.specialization_code):
             if len(options) >= 4:
                 break
-            if d.strip().lower() in have or d == correct:
+            if d.strip().lower() in seen or d == correct:
                 continue
             options.append(d)
-            have.add(d.strip().lower())
+            seen.add(d.strip().lower())
     rng.shuffle(options)
+    if options and options[0] == correct and len(options) > 1:
+        options[0], options[-1] = options[-1], options[0]
     custom = EmployerCustomItem(
         employer_id=bp.employer_id,
         title=title, body=body,

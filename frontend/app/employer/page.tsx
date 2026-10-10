@@ -623,7 +623,7 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
   const [skillsFound, setSkillsFound] = useState<any[]>(blueprint?.researched_skills || []);
   const [status, setStatus] = useState(blueprint ? normStatus(blueprint.status) : "нет теста");
   const [bid, setBid] = useState(blueprint?.id || null);
-  const [custom, setCustom] = useState({ title: "", body: "", correct: "" });
+  const [custom, setCustom] = useState({ title: "", body: "", options: ["", "", "", ""], correctIdx: 0 });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [open, setOpen] = useState<string | null>(null);
@@ -701,10 +701,11 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
 
   const addCustom = async () => {
     try {
+      const opts = custom.options.map((o) => o.trim()).filter(Boolean);
       await POST(`/employer/tests/${bid}/items`, {
-        title: custom.title, body: custom.body, options: [], correct: custom.correct,
+        title: custom.title, body: custom.body, options: opts, correct: custom.options[custom.correctIdx].trim(),
       });
-      setCustom({ title: "", body: "", correct: "" });
+      setCustom({ title: "", body: "", options: ["", "", "", ""], correctIdx: 0 });
       await reloadItems();
     } catch (e: any) { setErr(e.message); }
   };
@@ -775,12 +776,46 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
         <p className="text-sm font-medium text-[#5e2b8e]">Добавить свой вопрос</p>
         <div className="mt-1 grid gap-1.5">
           <input className={inputCls} placeholder="Название" value={custom.title}
-            onChange={(e) => setCustom({ ...custom, title: e.target.value })} />
+            onChange={(e) => setCustom((c) => ({ ...c, title: e.target.value }))} />
           <textarea className={inputCls} rows={2} placeholder="Текст вопроса" value={custom.body}
-            onChange={(e) => setCustom({ ...custom, body: e.target.value })} />
-          <input className={inputCls} placeholder="Верный ответ — три неправильных варианта сгенерируем сами" value={custom.correct}
-            onChange={(e) => setCustom({ ...custom, correct: e.target.value })} />
-          <Button onClick={addCustom} disabled={!custom.title || !custom.body || !custom.correct}>Добавить</Button>
+            onChange={(e) => setCustom((c) => ({ ...c, body: e.target.value }))} />
+          {custom.options.map((o: string, i: number) => (
+            <div key={i} className="flex items-center gap-2">
+              <input type="radio" name={`corr-${vacancy.id}`} className="shrink-0" checked={custom.correctIdx === i}
+                onChange={() => setCustom((c) => ({ ...c, correctIdx: i }))} />
+              <input className={inputCls} placeholder={`Вариант ${i + 1}`} value={o}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCustom((c) => {
+                    const next = [...c.options];
+                    next[i] = v;
+                    return { ...c, options: next };
+                  });
+                }} />
+              {i === custom.correctIdx && o.trim() && (
+                <span className="shrink-0 text-xs font-medium text-green-700">верный</span>
+              )}
+              {custom.options.length > 2 && (
+                <button className="shrink-0 text-xs text-red-500"
+                  onClick={() => setCustom((c) => {
+                    const next = c.options.filter((_: string, j: number) => j !== i);
+                    return { ...c, options: next, correctIdx: Math.min(c.correctIdx, next.length - 1) };
+                  })}>убрать</button>
+              )}
+            </div>
+          ))}
+          <div className="flex items-center gap-3">
+            <Button onClick={addCustom}
+              disabled={!custom.title || !custom.body || !custom.options[custom.correctIdx]?.trim()}>
+              Добавить
+            </Button>
+            {custom.options.length < 20 && (
+              <Button variant="ghost" onClick={() => setCustom((c) => ({ ...c, options: [...c.options, ""] }))}>
+                + вариант
+              </Button>
+            )}
+            <span className="text-xs text-gray-400">до 20 вариантов · пустые догенерируем сами</span>
+          </div>
         </div>
       </div>
       <div className="mt-2">
