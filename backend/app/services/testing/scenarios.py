@@ -26,7 +26,7 @@ SCENARIOS: list[Scenario] = [
         demo_vacancies=[
             {"title": "Бэкенд-разработчик Python", "stack": ["python", "fastapi", "postgresql", "docker"],
              "min_grade": "middle", "salary_min": 180000, "salary_max": 300000,
-             "description": "Разработка API платформы логистики: FastAPI, PostgreSQL, интеграции с внешними системами."},
+             "description": "Разработка API высоконагруженной платформы: FastAPI, PostgreSQL, интеграции с внешними системами."},
             {"title": "Backend Go-разработчик", "stack": ["go", "postgresql", "kafka", "kubernetes"],
              "min_grade": "senior", "salary_min": 280000, "salary_max": 450000,
              "description": "Высоконагруженные сервисы платёжного шлюза: Go, Kafka, Kubernetes."},
@@ -117,7 +117,7 @@ SCENARIOS: list[Scenario] = [
             {"title": "Делопроизводитель", "stack": [],
              "min_grade": "junior", "salary_min": 50000, "salary_max": 90000,
              "description": "Регистрация входящей/исходящей корреспонденции, архив, СЭД."},
-            {"title": "Секретарь-делопроизводитель", "stack": ["делопроизводство", "сэд"], "min_grade": "junior", "salary_min": 45000, "salary_max": 75000, "description": "Документооборот строительного холдинга: СЭД, командировки, архив."},
+            {"title": "Секретарь-делопроизводитель", "stack": ["делопроизводство", "сэд"], "min_grade": "junior", "salary_min": 45000, "salary_max": 75000, "description": "Документооборот в компании: СЭД, командировки, архив."},
         ],
     ),
     Scenario(

@@ -1,7 +1,10 @@
 import asyncio
+import os
 import random
+import shutil
 import uuid
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
@@ -120,6 +123,13 @@ EXTRA_VACANCIES = [
 ]
 
 
+ELLE_SUMMARY = ("ML-инженер с практическим опытом разработки и обучения нейросетей для задач "
+                "компьютерного зрения и медицинской визуализации. Работаю с PyTorch, обучаю и "
+                "оптимизирую модели сегментации, классификации и детекции, включая многозадачные "
+                "архитектуры. Умею быстро разбираться в новых доменах, самостоятельно ставить "
+                "задачи и доводить проекты до результата.")
+
+
 @router.post("/seed", summary="Наполнить базу демо-данными (reset=true — полный сброс для жюри)")
 async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
     if reset:
@@ -150,7 +160,7 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
             db.add(ItemTemplate(**item))
 
     employers_data = [
-        ("techlog@techlogistics.ru", "ТехноЛогистика", "Платформа логистики и доставки", "Логистика"),
+        ("techlog@techlogistics.ru", "АйтиЛайт", "Разработка веб-сервисов, платформ и ML-продуктов", "IT-разработка"),
         ("hr@finpay.ru", "ФинПэй", "Платёжный шлюз и финансовые сервисы", "Финтех"),
         ("jobs@dataminds.ru", "ДатаМайндс", "Продуктовая аналитика и ML", "Аналитика"),
         ("office@artel.ru", "Артель", "Корпоративные услуги и документооборот", "Услуги"),
@@ -163,8 +173,12 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
                  password_hash=emp_hash, role=UserRole.employer, email_confirmed=True)
         db.add(u)
         await db.flush()
+        it = company == "АйтиЛайт"
         db.add(EmployerProfile(user_id=u.id, company_name=company, description=desc,
-                               industry=industry, contact_email=email))
+                               industry=industry,
+                               contact_email=("hello@aitilight.ru" if it else email),
+                               contact_phone=("+7 495 320-45-67" if it else ""),
+                               photo_url=(f"media/avatars/{u.id}.jpg" if it else None)))
         employer_ids.append(u.id)
 
     vi = 0
@@ -206,7 +220,7 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
         name = f"{rng.choice(firsts)} {rng.choice(lasts)}"
         email = f"demo_cand_{i:03d}@example.ru"
 
-        has_fsp = rng.random() < 0.35
+        has_fsp = (rng.random() < 0.35) or i == 50
         fsp_id = fsp_ids[i % len(fsp_ids)] if has_fsp else None
         fsp_history = MOCK_REGISTRY[fsp_id]["achievements"] if has_fsp else None
 
@@ -215,7 +229,7 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
         db.add(u)
         await db.flush()
         cand_ids.append(str(u.id))
-        db.add(CandidateProfile(
+        prof = CandidateProfile(
             user_id=u.id, full_name=name,
             contacts={"email": email, "telegram": f"@cand_{i:03d}",
                       "phone": f"+7 9{rng.randint(100, 999)} {rng.randint(100, 999)}-{rng.randint(10, 99)}-{rng.randint(10, 99)}"},
@@ -230,19 +244,45 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
             last_activity_at=now - timedelta(days=(rng.randint(0, 5) if i < 3 else rng.randint(0, 60))),
             fsp_id=fsp_id, fsp_history=fsp_history,
             is_public=True, consent_data_processing=True,
-        ))
+        )
+        if i == 50:
+            prof.full_name = "Элка Роднева"
+            prof.contacts = {"email": email, "telegram": "@Elle", "phone": "+7 999 000-00-10"}
+            prof.summary = ELLE_SUMMARY
+            prof.stack = ["python", "pytorch", "ml", "sql"]
+            prof.experience_years = 4.0
+            prof.specialization_code = "ml"
+            prof.grade = theta_to_grade(1.2)
+            prof.theta, prof.theta_se = 1.2, 0.3
+            prof.theta_history = [1.2]
+            prof.photo_url = f"media/avatars/{u.id}.jpg"
+        db.add(prof)
         await db.flush()
         if has_fsp:
             for a in fsp_history:
                 db.add(FspAchievement(fsp_id=fsp_id, kind=a["kind"], title=a["title"],
                                       level=a["level"], result=a["result"], year=a["year"],
                                       weight=fsp_index([a])))
-        db.add(CandidateCategory(candidate_id=u.id, specialization_code=spec,
-                                 grade=theta_to_grade(true_theta), theta=round(true_theta, 2),
-                                 theta_se=0.3))
+        cat = CandidateCategory(candidate_id=u.id, specialization_code=spec,
+                                grade=theta_to_grade(true_theta), theta=round(true_theta, 2),
+                                theta_se=0.3)
+        if i == 50:
+            cat.specialization_code = "ml"
+            cat.grade = theta_to_grade(1.2)
+            cat.theta = 1.2
+        db.add(cat)
         await db.flush()
 
     await db.flush()
+    assets = Path(__file__).resolve().parent.parent.parent / "assets"
+    os.makedirs("media/avatars", exist_ok=True)
+    for uid, fname in (
+        (str(uuid.uuid5(uuid.NAMESPACE_DNS, employers_data[0][0])), "it_logo.jpg"),
+        (str(uuid.uuid5(uuid.NAMESPACE_DNS, "demo_cand_050@example.ru")), "elle_photo.jpg"),
+    ):
+        src = assets / fname
+        if src.exists():
+            shutil.copyfile(src, os.path.join("media", "avatars", f"{uid}.jpg"))
     from app.core.redisio import client as redis_client
     from app.models import Application, Grade, Invitation, InteractionStatus, TestSession, TestStatus
     techlog = employer_ids[0]
