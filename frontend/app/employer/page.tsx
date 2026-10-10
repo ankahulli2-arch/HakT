@@ -793,7 +793,6 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
 }
 
 function TestsStep({ vacancies, blueprints, specs, onDone }: any) {
-  const [saved, setSaved] = useState(false);
   return (
     <>
       {vacancies.length === 0 && (
@@ -805,12 +804,8 @@ function TestsStep({ vacancies, blueprints, specs, onDone }: any) {
       {vacancies.map((v: any) => (
         <DraftEditor key={v.id} vacancy={v} skills={specs} allBlueprints={blueprints}
           blueprint={findBlueprint(v, blueprints)}
-          onSaved={() => { setSaved(true); onDone(); }} />
+          onSaved={onDone} />
       ))}
-      <div className="flex items-center gap-3">
-        <Button variant="white" onClick={onDone}>Сохранить и перейти в личный кабинет</Button>
-        {saved && <span className="text-sm text-emerald-600">Тесты сохранены ✓</span>}
-      </div>
     </>
   );
 }
