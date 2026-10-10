@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -36,7 +37,7 @@ async def register(body: RegisterIn, db: AsyncSession = Depends(get_db)):
     db.add(user)
     await db.flush()
     if user.role == UserRole.candidate:
-        db.add(CandidateProfile(user_id=user.id))
+        db.add(CandidateProfile(user_id=user.id, last_activity_at=datetime.now(timezone.utc)))
     else:
         db.add(EmployerProfile(user_id=user.id))
     print(f"[auth] код подтверждения для {body.email}: {code}")

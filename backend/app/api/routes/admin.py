@@ -255,6 +255,7 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
             prof.grade = theta_to_grade(1.2)
             prof.theta, prof.theta_se = 1.2, 0.3
             prof.theta_history = [1.2]
+            prof.last_activity_at = now
             prof.photo_url = f"media/avatars/{u.id}.jpg"
         db.add(prof)
         await db.flush()

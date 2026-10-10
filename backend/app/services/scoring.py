@@ -231,7 +231,7 @@ async def build_shortlist(
     return top
 
 
-def freshness_days_left(last_activity_at: datetime | None, threshold: float = 0.25) -> int:
+def freshness_days_left(last_activity_at: datetime | None, threshold: float = 1.0 / math.e) -> int:
     """Сколько дней осталось, пока «пульс» профиля не упадёт до порога."""
     if last_activity_at is None:
         return 0
