@@ -134,14 +134,3 @@ class NeedIn(BaseModel):
     stack: list[str] = []
     only_fsp: bool = False
 
-class ShortlistItem(BaseModel):
-    candidate_id: str
-    full_name: str
-    category: str
-    grade: str
-    stack: list
-    experience_years: float
-    has_fsp: bool
-    score: float
-    rationale: str
-    breakdown: dict

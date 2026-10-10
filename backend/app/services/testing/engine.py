@@ -18,7 +18,7 @@ from app.models import (
     TestSession,
     TestStatus,
 )
-from app.services.scoring import theta_to_grade, theta_to_score, final_score, board_key
+from app.services.scoring import theta_to_grade, final_score, board_key
 from app.core.redisio import client as redis_client
 from app.services.testing.blueprint import blueprint_pool
 
@@ -77,7 +77,7 @@ def _loop_code(lang: str, depth: int) -> str:
             body += "  " * (d + 1) + f"for (let i{d} = 0; i{d} < n; i{d}++) {{\n"
         body += "  " * (depth + 1) + "counter++;\n" + "  " * depth + "}"
         return f"```javascript\nfunction f(n) {{\n  let counter = 0;\n{body}\n  return counter;\n}}\n```"
-    inc = "++" if lang == "c++" else "++"
+    inc = "++"
     body = ""
     for d in range(depth):
         body += "    " * (d + 1) + f"for (int i{d} = 0; i{d} < n; i{d}{inc}) {{\n"
@@ -443,7 +443,7 @@ async def next_item(db: AsyncSession, session: TestSession) -> dict | None:
     }
 
 
-MIN_ANSWER_MS = {"quiz": 3500, "code": 12000, "exact": 12000}
+MIN_ANSWER_MS = {"quiz": 3500, "exact": 12000}
 AWAY_SIGNAL_MS = 8000
 
 

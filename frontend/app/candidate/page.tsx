@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DEL, GET, POST, PUT, GRADE_RU, GRADE_RU_GEN, SPEC_RU, downloadPdf, getRole, logout, photoUrl, uploadFile } from "@/lib/api";
+import { GET, POST, PUT, GRADE_RU_GEN, SPEC_RU, downloadPdf, getRole, logout, photoUrl, uploadFile } from "@/lib/api";
 import { Badge, Bar, Button, Card, Field, FspAchievements, GRADE_TITLE, HistoryBlock, inputCls, ruCategory } from "@/components/ui";
 
 type Tab = "overview" | "test" | "invites" | "vacancies" | "tasks";
@@ -107,8 +107,8 @@ export default function CandidatePage() {
           {stage === "profile" && (
             <>
               <p className="text-white/90 text-sm">Шаг 1. Расскажите о себе — это увидят работодатели в подборке</p>
-              <ProfileTab profile={profile} status={status} specs={specs} reload={loadAll}
-                onNext={async () => { setStage("test"); }} autoSave />
+              <ProfileTab profile={profile} reload={loadAll}
+                onNext={async () => { setStage("test"); }} />
               <ProfileFsp profile={profile} reload={loadAll} />
             </>
           )}
@@ -483,12 +483,11 @@ function PrivacyCard({ profile }: any) {
   );
 }
 
-function ProfileTab({ profile, status, specs, reload, onNext, autoSave }: any) {
+function ProfileTab({ profile, reload, onNext }: any) {
   const [form, setForm] = useState({
     full_name: "", contacts: { telegram: "", phone: "" }, summary: "",
     stack: [], experience_years: 0,
   });
-  const [fspId, setFspId] = useState("");
   const [msg, setMsg] = useState("");
 
   const [allStackTags, setAllStackTags] = useState<string[]>([]);
@@ -503,7 +502,6 @@ function ProfileTab({ profile, status, specs, reload, onNext, autoSave }: any) {
         stack: profile.stack || [],
         experience_years: profile.experience_years || 0,
       });
-      setFspId(profile.fsp_id || "");
     }
   }, [profile]);
 
@@ -528,14 +526,6 @@ function ProfileTab({ profile, status, specs, reload, onNext, autoSave }: any) {
   };
   const removeStack = (tag: string) =>
     setForm({ ...form, stack: form.stack.filter((x: string) => x !== tag) });
-
-  const linkFsp = async () => {
-    try {
-      const r = await POST(`/fsp/link/${fspId}`);
-      setMsg(r.linked ? `Связано: ${r.name}, рейтинг ФСП ${r.rating}` : r.note);
-      reload();
-    } catch (e: any) { setMsg(e.message); }
-  };
 
   if (!profile) return null;
   return (

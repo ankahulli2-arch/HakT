@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_employer_profile
 from app.core.db import get_db
 from app.models import EmployerNeed, Grade
-from app.schemas import NeedIn, ShortlistItem
+from app.schemas import NeedIn
 from app.services import scoring
 
 router = APIRouter(tags=["matching"])

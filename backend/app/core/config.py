@@ -8,7 +8,6 @@ class Settings(BaseSettings):
 
 
     app_name: str = "FSP Talent Platform"
-    environment: str = "dev"
     secret_key: str = "change-me-in-production"
 
 
@@ -18,7 +17,6 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
 
-    jwt_algorithm: str = "HS256"
     frontend_url: str = "http://localhost:3000"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 14

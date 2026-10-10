@@ -19,14 +19,29 @@ def _safe_image_ext(filename: str | None) -> str:
     ext = (filename or "").rsplit(".", 1)[-1].lower()
     return ext if ext in IMG_EXT else "jpg"
 
-@router.post("/candidate/photo", status_code=201, summary="Загрузить фото профиля")
-async def upload_photo(file: UploadFile, profile=Depends(get_candidate_profile)):
+async def _save_avatar(profile, file: UploadFile) -> dict:
     os.makedirs("media/avatars", exist_ok=True)
     path = f"media/avatars/{profile.user_id}.{_safe_image_ext(file.filename)}"
     with open(path, "wb") as f:
         f.write(await file.read())
     profile.photo_url = path
     return {"photo_url": path}
+
+
+def _cert_params(profile):
+    from app.core.config import settings
+    from app.core.security import sign_category
+    from app.services.scoring import final_score
+    score = final_score(profile.theta, profile.integrity)
+    signature = sign_category(str(profile.user_id), profile.specialization_code,
+                              profile.grade.value, score)
+    verify_url = f"{settings.frontend_url}/verify/{profile.user_id}/{signature}"
+    return score, signature, verify_url
+
+
+@router.post("/candidate/photo", status_code=201, summary="Загрузить фото профиля")
+async def upload_photo(file: UploadFile, profile=Depends(get_candidate_profile)):
+    return await _save_avatar(profile, file)
 
 
 @router.get("/candidate/profile.pdf", summary="Стандартизированный PDF-профиль (автогенерация)")
@@ -52,13 +67,7 @@ async def profile_pdf(profile=Depends(get_candidate_profile), db=Depends(get_db)
 
     verify_url = None
     if profile.grade is not None and profile.specialization_code:
-        from app.core.config import settings
-        from app.core.security import sign_category
-        from app.services.scoring import final_score
-        score = final_score(profile.theta, profile.integrity)
-        signature = sign_category(str(profile.user_id), profile.specialization_code,
-                                  profile.grade.value, score)
-        verify_url = f"{settings.frontend_url}/verify/{profile.user_id}/{signature}"
+        _, _, verify_url = _cert_params(profile)
 
     os.makedirs("media/pdf", exist_ok=True)
     path = f"media/pdf/{profile.user_id}.pdf"
@@ -70,18 +79,13 @@ async def profile_pdf(profile=Depends(get_candidate_profile), db=Depends(get_db)
 async def certificate_pdf(profile=Depends(get_candidate_profile), db=Depends(get_db)):
     from app.models import Specialization
     from app.services.pdf import generate_certificate_pdf
-    from app.services.scoring import final_score
-    from app.core.config import settings
-    from app.core.security import sign_category
 
     if profile.grade is None or not profile.specialization_code:
         raise HTTPException(400, "Сначала пройдите тестирование")
 
     spec = await db.get(Specialization, profile.specialization_code)
-    score = final_score(profile.theta, profile.integrity)
     grade = profile.grade.value
-    signature = sign_category(str(profile.user_id), profile.specialization_code, grade, score)
-    verify_url = f"{settings.frontend_url}/verify/{profile.user_id}/{signature}"
+    score, signature, verify_url = _cert_params(profile)
 
     os.makedirs("media/pdf", exist_ok=True)
     path = f"media/pdf/{profile.user_id}_cert.pdf"
@@ -136,12 +140,7 @@ async def parse_resume(file: UploadFile, profile=Depends(get_candidate_profile),
 
 @router.post("/employer/photo", status_code=201, summary="Загрузить логотип компании")
 async def upload_employer_photo(file: UploadFile, profile=Depends(get_employer_profile)):
-    os.makedirs("media/avatars", exist_ok=True)
-    path = f"media/avatars/{profile.user_id}.{_safe_image_ext(file.filename)}"
-    with open(path, "wb") as f:
-        f.write(await file.read())
-    profile.photo_url = path
-    return {"photo_url": path}
+    return await _save_avatar(profile, file)
 
 
 @router.get("/media/{path:path}", include_in_schema=False)

@@ -27,7 +27,7 @@ from app.models import (
     Vacancy,
 )
 from app.schemas import InvitationIn, VacancyIn, VacancyOut
-from app.services.scoring import build_shortlist, category_ru, theta_to_score, final_score
+from app.services.scoring import build_shortlist, category_ru, final_score
 from app.services.testing import engine
 
 INVITE_TTL_DAYS = 14
@@ -85,12 +85,31 @@ async def list_vacancies(db=Depends(get_db), specialization_code: str | None = N
             companies[v.employer_id] = (await db.get(EmployerProfile, v.employer_id)).company_name
     return [_vacancy_out(v, companies[v.employer_id]) for v in vacancies]
 
-@router.delete("/vacancies/{vacancy_id}", summary="Снять свою вакансию")
-async def delete_vacancy(vacancy_id: str, employer=Depends(get_employer_profile),
-                         db=Depends(get_db)):
+async def _own_vacancy(db, employer, vacancy_id: str):
     v = await db.get(Vacancy, vacancy_id)
     if v is None or v.employer_id != employer.user_id:
         raise HTTPException(404, "Вакансия не найдена")
+    return v
+
+
+async def _own_invitation(db, profile, invitation_id: str):
+    inv = await db.get(Invitation, invitation_id)
+    if inv is None or inv.candidate_id != profile.user_id:
+        raise HTTPException(404, "Приглашение не найдено")
+    return inv
+
+
+async def _own_microtask(db, profile, microtask_id: str):
+    mt = await db.get(Microtask, microtask_id)
+    if mt is None or mt.candidate_id != profile.user_id:
+        raise HTTPException(404, "Задача не найдена")
+    return mt
+
+
+@router.delete("/vacancies/{vacancy_id}", summary="Снять свою вакансию")
+async def delete_vacancy(vacancy_id: str, employer=Depends(get_employer_profile),
+                         db=Depends(get_db)):
+    v = await _own_vacancy(db, employer, vacancy_id)
     v.is_active = False
     return {"id": vacancy_id, "is_active": False}
 
@@ -134,9 +153,7 @@ async def invite(body: InvitationIn, employer=Depends(get_employer_profile),
     if body.salary_min > body.salary_max:
         raise HTTPException(422, "salary_min не может быть больше salary_max")
     if body.vacancy_id is not None:
-        vacancy = await db.get(Vacancy, body.vacancy_id)
-        if vacancy is None or vacancy.employer_id != employer.user_id:
-            raise HTTPException(404, "Вакансия не найдена")
+        await _own_vacancy(db, employer, str(body.vacancy_id))
     if body.blueprint_id is not None:
         bp = await db.get(TestBlueprint, body.blueprint_id)
         if bp is None or bp.employer_id != employer.user_id or bp.status != "published":
@@ -186,9 +203,7 @@ async def candidate_invitations(profile=Depends(get_candidate_profile), db=Depen
              summary="Принять или отклонить приглашение")
 async def decide_invitation(invitation_id: str, accept: bool,
                             profile=Depends(get_candidate_profile), db=Depends(get_db)):
-    inv = await db.get(Invitation, invitation_id)
-    if inv is None or inv.candidate_id != profile.user_id:
-        raise HTTPException(404, "Приглашение не найдено")
+    inv = await _own_invitation(db, profile, invitation_id)
     if inv.status not in (InteractionStatus.sent, InteractionStatus.viewed):
         raise HTTPException(409, "Решение уже принято")
     inv.status = InteractionStatus.accepted if accept else InteractionStatus.declined
@@ -302,9 +317,7 @@ async def create_microtask(candidate_id: str, title: str, body_text: str,
             summary="Подборка кандидатов под конкретную вакансию")
 async def vacancy_shortlist(vacancy_id: str, employer=Depends(get_employer_profile),
                             db=Depends(get_db)):
-    v = await db.get(Vacancy, vacancy_id)
-    if v is None or v.employer_id != employer.user_id:
-        raise HTTPException(404, "Вакансия не найдена")
+    v = await _own_vacancy(db, employer, vacancy_id)
     need = EmployerNeed(
         employer_id=employer.user_id,
         raw_text=v.description,
@@ -548,9 +561,7 @@ async def my_microtasks(profile=Depends(get_candidate_profile), db=Depends(get_d
              summary="Решить задачу или предложить подход")
 async def submit_microtask(microtask_id: str, solution: str, approach_only: bool = False,
                            profile=Depends(get_candidate_profile), db=Depends(get_db)):
-    mt = await db.get(Microtask, microtask_id)
-    if mt is None or mt.candidate_id != profile.user_id:
-        raise HTTPException(404, "Задача не найдена")
+    mt = await _own_microtask(db, profile, microtask_id)
     if mt.status != MicrotaskStatus.pending:
         raise HTTPException(409, "Задача уже сдана")
     mt.solution = solution

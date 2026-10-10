@@ -58,8 +58,7 @@ async def registry(fsp_id: str):
 
 
 @router.post("/link/{fsp_id}", summary="Связать профиль с ФСП ID")
-async def link(fsp_id: str, candidate: CandidateProfile = Depends(get_candidate_profile),
-               db: AsyncSession = Depends(get_db)):
+async def link(fsp_id: str, candidate: CandidateProfile = Depends(get_candidate_profile)):
     record = MOCK_REGISTRY.get(fsp_id)
     if record is None:
         return {"linked": False,

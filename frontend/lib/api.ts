@@ -1,6 +1,6 @@
 export const API = process.env.NEXT_PUBLIC_API || "http://localhost:8000/api";
 
-export const API_BASE = API;
+const API_BASE = API;
 export const photoUrl = (p?: string | null): string =>
   p ? `${API_BASE}${p.startsWith("/") ? "" : "/"}${p}` : "";
 

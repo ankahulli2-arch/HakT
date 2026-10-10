@@ -43,6 +43,13 @@ async def register(body: RegisterIn, db: AsyncSession = Depends(get_db)):
     print(f"[auth] код подтверждения для {body.email}: {code}")
     return {"user_id": str(user.id), "confirm_code_mvp": code, "message": "Подтвердите email кодом"}
 
+def _pair(sub: str, role: str) -> TokenPair:
+    return TokenPair(
+        access_token=create_access_token(sub, role),
+        refresh_token=create_refresh_token(sub, role),
+        role=role,
+    )
+
 @router.post("/auth/confirm", response_model=TokenPair)
 async def confirm(body: ConfirmIn, db: AsyncSession = Depends(get_db)):
     user = (await db.execute(select(User).where(User.email == body.email.lower()))).scalar_one_or_none()
@@ -52,11 +59,7 @@ async def confirm(body: ConfirmIn, db: AsyncSession = Depends(get_db)):
         raise HTTPException(409, "Email уже подтверждён")
     user.email_confirmed = True
     user.confirm_code = None
-    return TokenPair(
-        access_token=create_access_token(str(user.id), user.role.value),
-        refresh_token=create_refresh_token(str(user.id), user.role.value),
-        role=user.role.value,
-    )
+    return _pair(str(user.id), user.role.value)
 
 @router.post("/auth/login", response_model=TokenPair)
 async def login(body: LoginIn, db: AsyncSession = Depends(get_db)):
@@ -65,11 +68,7 @@ async def login(body: LoginIn, db: AsyncSession = Depends(get_db)):
         raise HTTPException(401, "Неверный email или пароль")
     if not user.email_confirmed:
         raise HTTPException(403, "Подтвердите email")
-    return TokenPair(
-        access_token=create_access_token(str(user.id), user.role.value),
-        refresh_token=create_refresh_token(str(user.id), user.role.value),
-        role=user.role.value,
-    )
+    return _pair(str(user.id), user.role.value)
 
 @router.post("/auth/refresh", response_model=TokenPair)
 async def refresh(refresh_token: str):
@@ -80,8 +79,4 @@ async def refresh(refresh_token: str):
     if payload.get("typ") != "refresh":
         raise HTTPException(401, "Ожидался refresh-токен")
     role = payload.get("role", "candidate")
-    return TokenPair(
-        access_token=create_access_token(payload["sub"], role),
-        refresh_token=create_refresh_token(payload["sub"], role),
-        role=role,
-    )
+    return _pair(payload["sub"], role)

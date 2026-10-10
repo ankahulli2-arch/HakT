@@ -171,9 +171,9 @@ async def add_custom_item(
     correct = correct.strip()
     if correct.lower() not in seen:
         options.append(correct)
-    if len(options) < 4:
+    if len(options) < 3:
         for d in _autodistractors(correct, rng, bp.specialization_code):
-            if len(options) >= 4:
+            if len(options) >= 3:
                 break
             if d.strip().lower() in seen or d == correct:
                 continue

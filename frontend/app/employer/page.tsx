@@ -618,7 +618,7 @@ function VacanciesStep({ specs, setSpecs, skills, onDone }: any) {
   );
 }
 
-function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any) {
+function DraftEditor({ vacancy, blueprint, allBlueprints, onSaved }: any) {
   const [items, setItems] = useState<any[]>(blueprint?.items || []);
   const [skillsFound, setSkillsFound] = useState<any[]>(blueprint?.researched_skills || []);
   const [status, setStatus] = useState(blueprint ? normStatus(blueprint.status) : "нет теста");
@@ -795,7 +795,7 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
               {i === custom.correctIdx && o.trim() && (
                 <span className="shrink-0 text-xs font-medium text-green-700">верный</span>
               )}
-              {custom.options.length > 2 && (
+              {custom.options.length > 3 && (
                 <button className="shrink-0 text-xs text-red-500"
                   onClick={() => setCustom((c) => {
                     const next = c.options.filter((_: string, j: number) => j !== i);
@@ -837,7 +837,7 @@ function TestsStep({ vacancies, blueprints, specs, onDone }: any) {
         </Card>
       )}
       {vacancies.map((v: any) => (
-        <DraftEditor key={v.id} vacancy={v} skills={specs} allBlueprints={blueprints}
+        <DraftEditor key={v.id} vacancy={v} allBlueprints={blueprints}
           blueprint={findBlueprint(v, blueprints)}
           onSaved={onDone} />
       ))}
@@ -874,7 +874,7 @@ function TestsTab({ vacancies, blueprints, specs, reload }: any) {
       {withTest.filter((v: any) => editing === v.id).map((v: any) => (
         <DraftEditor key={v.id} vacancy={v} allBlueprints={blueprints}
           blueprint={findBlueprint(v, blueprints)}
-          skills={specs} onSaved={reload} />
+          onSaved={reload} />
       ))}
     </>
   );

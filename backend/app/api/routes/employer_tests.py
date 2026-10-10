@@ -77,12 +77,17 @@ async def my_blueprints(employer=Depends(get_employer_profile), db=Depends(get_d
         for b in rows
     ]
 
-@router.get("/{blueprint_id}", summary="Просмотр черновика (с образцом каждого вопроса)")
-async def get_blueprint(blueprint_id: str, employer=Depends(get_employer_profile),
-                        db=Depends(get_db)):
+async def _own_blueprint(db, employer, blueprint_id: str) -> TestBlueprint:
     bp = await db.get(TestBlueprint, blueprint_id)
     if bp is None or bp.employer_id != employer.user_id:
         raise HTTPException(404, "Черновик не найден")
+    return bp
+
+
+@router.get("/{blueprint_id}", summary="Просмотр черновика (с образцом каждого вопроса)")
+async def get_blueprint(blueprint_id: str, employer=Depends(get_employer_profile),
+                        db=Depends(get_db)):
+    bp = await _own_blueprint(db, employer, blueprint_id)
     items = []
     for e in bp.items_json:
         item = dict(e)
@@ -111,9 +116,7 @@ async def get_blueprint(blueprint_id: str, employer=Depends(get_employer_profile
 @router.put("/{blueprint_id}/items", summary="Заменить состав теста целиком")
 async def put_items(blueprint_id: str, body: ItemsIn,
                     employer=Depends(get_employer_profile), db=Depends(get_db)):
-    bp = await db.get(TestBlueprint, blueprint_id)
-    if bp is None or bp.employer_id != employer.user_id:
-        raise HTTPException(404, "Черновик не найден")
+    bp = await _own_blueprint(db, employer, blueprint_id)
     bp = await bp_service.replace_items(db, bp, body.items)
     return {"id": str(bp.id), "items_count": len(bp.items_json)}
 
@@ -121,9 +124,7 @@ async def put_items(blueprint_id: str, body: ItemsIn,
              summary="Добавить свой вопрос с ответом")
 async def add_item(blueprint_id: str, body: CustomItemIn,
                    employer=Depends(get_employer_profile), db=Depends(get_db)):
-    bp = await db.get(TestBlueprint, blueprint_id)
-    if bp is None or bp.employer_id != employer.user_id:
-        raise HTTPException(404, "Черновик не найден")
+    bp = await _own_blueprint(db, employer, blueprint_id)
     if body.correct not in body.options and body.options:
         raise HTTPException(422, "correct должен совпадать с одним из options")
     entry = await bp_service.add_custom_item(
@@ -134,9 +135,7 @@ async def add_item(blueprint_id: str, body: CustomItemIn,
 @router.delete("/{blueprint_id}/items/{item_ref}", summary="Убрать задание из теста")
 async def remove_item(blueprint_id: str, item_ref: str,
                       employer=Depends(get_employer_profile), db=Depends(get_db)):
-    bp = await db.get(TestBlueprint, blueprint_id)
-    if bp is None or bp.employer_id != employer.user_id:
-        raise HTTPException(404, "Черновик не найден")
+    bp = await _own_blueprint(db, employer, blueprint_id)
     bp.items_json = [e for e in bp.items_json if e.get("ref_id") != item_ref]
     await db.flush()
     return {"id": str(bp.id), "items_count": len(bp.items_json)}
@@ -144,9 +143,7 @@ async def remove_item(blueprint_id: str, item_ref: str,
 @router.post("/{blueprint_id}/publish", summary="Опубликовать тест (прикрепляется к приглашениям)")
 async def publish(blueprint_id: str, employer=Depends(get_employer_profile),
                   db=Depends(get_db)):
-    bp = await db.get(TestBlueprint, blueprint_id)
-    if bp is None or bp.employer_id != employer.user_id:
-        raise HTTPException(404, "Черновик не найден")
+    bp = await _own_blueprint(db, employer, blueprint_id)
     if not bp.items_json:
         raise HTTPException(422, "Пустой тест публиковать нельзя")
     bp = await bp_service.publish(db, bp)
