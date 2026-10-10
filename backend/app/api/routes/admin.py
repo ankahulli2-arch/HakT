@@ -328,6 +328,22 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
         if prof is not None:
             prof.theta = theta
             prof.theta_history = [theta]
+    back = sorted((c for c in cats if c.specialization_code == "backend"),
+                  key=lambda c: -c.theta)
+    if len(back) == 19:
+        row = back[16]
+        row.theta = -1.15
+        row.grade = Grade.junior
+        prof = await db.get(CandidateProfile, row.candidate_id)
+        if prof is not None:
+            prof.theta, prof.theta_history = -1.15, [-1.15]
+            prof.grade = Grade.junior
+        donor = min((c for c in cats if c.specialization_code == "ml"), key=lambda c: c.theta)
+        extra = CandidateCategory(candidate_id=donor.candidate_id,
+                                  specialization_code="backend",
+                                  grade=Grade.junior, theta=-1.56, theta_se=0.3)
+        db.add(extra)
+        cats = list(cats) + [extra]
     await db.flush()
     board: dict[str, dict[str, float]] = {}
     profs = {p.user_id: p for p in (await db.execute(select(CandidateProfile))).scalars().all()}
