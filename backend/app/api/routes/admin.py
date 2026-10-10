@@ -22,6 +22,7 @@ from app.models import (
     Vacancy,
 )
 from app.services.scoring import fsp_index, theta_to_grade, board_key
+from app.services.testing.blueprint import make_draft, publish
 from app.services.testing.scenarios import SCENARIOS, build_bank_items
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -182,6 +183,16 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
                        code_language=v.get("code_language", "python"),
                        salary_min=v["salary_min"], salary_max=v["salary_max"]))
         vi += 1
+
+    first_vac = (await db.execute(
+        select(Vacancy).where(Vacancy.employer_id == employer_ids[0]).limit(1)
+    )).scalars().first()
+    if first_vac is not None:
+        bp = await make_draft(db, employer_ids[0], first_vac.specialization_code,
+                              first_vac.title, use_web=False,
+                              vacancy_id=str(first_vac.id),
+                              code_language=first_vac.code_language or "python")
+        await publish(db, bp)
 
     fsp_ids = list(MOCK_REGISTRY.keys())
     now = datetime.now(timezone.utc)
