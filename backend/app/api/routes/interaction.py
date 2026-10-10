@@ -457,42 +457,23 @@ async def candidate_growth(candidate=Depends(get_candidate_profile), db=Depends(
         select(CandidateCategory).where(CandidateCategory.candidate_id == candidate.user_id)
     )).scalars().all()
     if not cats:
-        return {"steps": [{"action": "Пройдите тестирование — без категории вы невидимы для работодателей", "delta": 0.45}]}
+        return {"steps": [{"action": "Пройдите тестирование — без категории вы невидимы для работодателей", "delta": 0.60}]}
 
     cat = max(cats, key=lambda x: x.theta)
-    base, breakdown = compute_score(candidate, [], theta_override=cat.theta)
+    base, breakdown = compute_score(candidate, theta_override=cat.theta)
 
     steps = []
     fresh_now = breakdown["freshness"]["value"]
     if fresh_now < 0.99:
         steps.append({
             "action": "Решите микрозадачу — профиль снова «тёплый»",
-            "delta": round(0.15 * (1.0 - fresh_now), 3),
-        })
-    my_stack = {s.lower() for s in (candidate.stack or [])}
-    wanted = (await db.execute(
-        select(Vacancy.stack).where(
-            Vacancy.is_active.is_(True),
-            Vacancy.specialization_code == cat.specialization_code,
-        )
-    )).scalars().all()
-    popular: dict[str, int] = {}
-    for stack in wanted:
-        for t in stack:
-            if t.lower() not in my_stack:
-                popular[t.lower()] = popular.get(t.lower(), 0) + 1
-    top_wanted = sorted(popular, key=popular.get, reverse=True)[:3]
-    if top_wanted:
-        match_now = breakdown["match"]["value"]
-        steps.append({
-            "action": f"Добавьте навыки из актуальных вакансий: {', '.join(top_wanted)}",
-            "delta": round(0.10 * (1.0 - match_now), 3),
+            "delta": round(0.10 * (1.0 - fresh_now), 3),
         })
     bounds = {"junior": -0.5, "middle": 0.5, "senior": 1.5, "lead": None}
     target_b = bounds.get(cat.grade.value)
     if target_b is not None:
         theta_target = target_b + 0.25
-        delta = 0.45 * (1.0 / (1.0 + math.exp(-theta_target)) - breakdown["theta"]["value"])
+        delta = 0.60 * (1.0 / (1.0 + math.exp(-theta_target)) - breakdown["theta"]["value"])
         if delta > 0.005:
             next_grade = GRADE_ORDER[GRADE_ORDER.index(cat.grade.value) + 1]
             steps.append({
@@ -531,7 +512,7 @@ async def candidate_metrics_data(db, candidate) -> list[dict]:
         above = sum(1 for k in keys if k > mine)
         below = sum(1 for k in keys if k < mine)
         total = len(keys)
-        _, breakdown = compute_score(candidate, [], theta_override=cat.theta)
+        _, breakdown = compute_score(candidate, theta_override=cat.theta)
         out.append({
             "specialization": cat.specialization_code,
             "grade": cat.grade.value,

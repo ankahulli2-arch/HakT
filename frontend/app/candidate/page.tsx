@@ -437,9 +437,18 @@ function ProfileFsp({ profile, reload }: any) {
       )}
       {msg && <p className="mt-2 text-sm text-gray-600">{msg}</p>}
       <p className="mt-2 text-xs text-gray-400">
-        Укажите ваши достижения в ФСП: введите ID участника (вида FSP-2026-0001) — подтвердим их автоматически
-        и добавим вам вес в подборках работодателей.
+        Укажите ваши достижения в ФСП: введите ID участника — подтвердим их автоматически
+        и добавим вам вес в подборках работодателей. Демо-ID для проверки:
       </p>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        {["FSP-2026-0001", "FSP-2026-0002", "FSP-2026-0003"].map((id) => (
+          <button key={id} type="button"
+            className="rounded-md border border-[#c8b0e0] px-2 py-0.5 font-mono text-[11px] text-[#5e2b8e] hover:bg-[#f3ecfa]"
+            onClick={() => { setFspId(id); navigator.clipboard?.writeText(id); }}>
+            {id}
+          </button>
+        ))}
+      </div>
     </Card>
   );
 }

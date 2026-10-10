@@ -49,8 +49,8 @@
   app/services/testing/scenarios.py сценарии вакансий (8 специализаций) → банк заданий
   app/services/testing/blueprint.py черновик теста: поиск навыков в интернете (DuckDuckGo),
                                     автосборка, свои вопросы, публикация
-  app/services/scoring.py           Score = 0.45·θ + 0.20·ФСП + 0.15·активность
-                                    + 0.10·стек + 0.10·стабильность; разложение вкладов;
+  app/services/scoring.py           Score = 0.60·θ + 0.20·ФСП + 0.10·честность
+                                    + 0.10·активность; разложение вкладов;
                                     подборка, маскирование имён при слепом найме
   app/services/pdf.py               PDF-профиль и сертификат с QR (reportlab + segno)
   app/services/validation.py        симуляция 1500 кандидатов для /api/admin/validate

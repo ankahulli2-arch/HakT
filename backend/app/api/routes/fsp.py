@@ -47,7 +47,7 @@ def sign_record(payload: dict) -> str:
     return hmac.new(settings.secret_key.encode(), raw.encode(), hashlib.sha256).hexdigest()
 
 
-@router.get("/registry/{fsp_id}", summary="История достижений участника ФСП (мок-реестр)")
+@router.get("/registry/{fsp_id}", summary="История достижений участника ФСП (демо-реестр)")
 async def registry(fsp_id: str):
     record = MOCK_REGISTRY.get(fsp_id)
     if record is None:
