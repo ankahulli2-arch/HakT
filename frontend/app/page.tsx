@@ -134,7 +134,7 @@ export default function Landing() {
 
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
       </Card>
-      <DemoQuiz onRegister={() => setMode("register")} />
+      {stage === "creds" && <DemoQuiz onRegister={() => setMode("register")} />}
       </div>
     </main>
   );
