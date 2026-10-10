@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DEL, GET, POST, PUT, GRADE_RU, GRADE_RU_GEN, SPEC_RU, downloadCertificate, downloadPdf, getRole, logout, photoUrl, uploadFile } from "@/lib/api";
+import { DEL, GET, POST, PUT, GRADE_RU, GRADE_RU_GEN, SPEC_RU, downloadPdf, getRole, logout, photoUrl, uploadFile } from "@/lib/api";
 import { Badge, Bar, Button, Card, Field, FspAchievements, GRADE_TITLE, HistoryBlock, inputCls, ruCategory } from "@/components/ui";
 
 type Tab = "overview" | "test" | "invites" | "vacancies" | "tasks";
@@ -158,9 +158,6 @@ function OverviewTab({ profile, status, metrics, invites, newInvites, specs, rel
           <h3 className="font-semibold text-[#3b1f5e]">Ваш рейтинг</h3>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={() => downloadPdf().catch(() => {})}>PDF-профиль</Button>
-            {metrics.length > 0 && (
-              <Button variant="ghost" onClick={() => downloadCertificate().catch(() => {})}>Сертификат</Button>
-            )}
             <Button variant="ghost" onClick={goTest}>Пройти тест ещё раз</Button>
           </div>
         </div>

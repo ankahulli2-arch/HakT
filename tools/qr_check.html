@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Проверка QR-сертификата ФСП</title>
+<style>
+  body { font-family: "Segoe UI", sans-serif; background: #f4f2f9; margin: 0;
+         display: flex; justify-content: center; padding: 40px 16px; color: #1d1530; }
+  .card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(60,30,90,.12);
+          padding: 32px 36px; max-width: 640px; width: 100%; }
+  h1 { font-size: 22px; margin: 0 0 6px; color: #3b1f5e; }
+  p.hint { color: #6b6478; font-size: 14px; margin: 0 0 20px; }
+  #drop { border: 2px dashed #b9a8d6; border-radius: 12px; padding: 34px; text-align: center;
+          color: #6b6478; font-size: 15px; cursor: pointer; transition: .15s; }
+  #drop.over { border-color: #5e2b8e; background: #f6f1fc; color: #3b1f5e; }
+  #url { margin: 18px 0 0; padding: 12px 14px; background: #f6f1fc; border-radius: 10px;
+         font-size: 14px; word-break: break-all; display: none; }
+  #open { display: none; margin-top: 14px; background: #5e2b8e; color: #fff; border: 0;
+          border-radius: 10px; padding: 12px 22px; font-size: 15px; cursor: pointer; }
+  #open:hover { background: #4a2172; }
+  #err { color: #b3261e; font-size: 14px; margin-top: 12px; display: none; }
+  .steps { margin-top: 26px; font-size: 13px; color: #6b6478; line-height: 1.6; }
+  .steps b { color: #3b1f5e; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Проверка QR-сертификата</h1>
+  <p class="hint">Вставьте скриншот QR-кода из PDF-профиля (Ctrl+V) или перетащите файл сюда.</p>
+  <div id="drop">Скриншот или файл с QR-кодом<br><small>можно так же вставить из буфера — Ctrl+V</small></div>
+  <input type="file" id="file" accept="image/*" hidden>
+  <div id="url"></div>
+  <button id="open">Открыть страницу проверки</button>
+  <div id="err"></div>
+  <div class="steps">
+    <b>Как это работает.</b> Страница расшифровывает QR локально, без интернета. Если код
+    подлинный, откроется страница проверки: сервер сверит HMAC-подпись с базой и покажет
+    «Сертификат подлинный» с текущими баллами кандидата.
+  </div>
+</div>
+<canvas id="c" hidden></canvas>
+<script src="jsQR.js"></script>
+<script>
+const drop = document.getElementById("drop");
+const file = document.getElementById("file");
+const urlBox = document.getElementById("url");
+const openBtn = document.getElementById("open");
+const err = document.getElementById("err");
+let lastUrl = "";
+
+drop.addEventListener("click", () => file.click());
+file.addEventListener("change", () => file.files[0] && handle(file.files[0]));
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("over");
+  if (e.dataTransfer.files[0]) handle(e.dataTransfer.files[0]);
+});
+document.addEventListener("paste", e => {
+  for (const it of e.clipboardData.items)
+    if (it.type.startsWith("image/")) { handle(it.getAsFile()); return; }
+});
+
+function handle(blob) {
+  const img = new Image();
+  img.onload = () => {
+    const k = Math.min(1, 1400 / Math.max(img.width, img.height));
+    const cv = document.getElementById("c");
+    cv.width = Math.round(img.width * k);
+    cv.height = Math.round(img.height * k);
+    const ctx = cv.getContext("2d", { willReadFrequently: true });
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(img, 0, 0, cv.width, cv.height);
+    const code = jsQR(ctx.getImageData(0, 0, cv.width, cv.height).data, cv.width, cv.height);
+    if (code && /^https?:\/\//i.test(code.data)) {
+      lastUrl = code.data;
+      urlBox.textContent = code.data;
+      urlBox.style.display = openBtn.style.display = "block";
+      err.style.display = "none";
+    } else {
+      lastUrl = "";
+      urlBox.style.display = openBtn.style.display = "none";
+      err.textContent = "QR-код не найден. Сделайте скриншот повыше (Win+Shift+S) " +
+                        "так, чтобы код был целиком, и вставьте снова.";
+      err.style.display = "block";
+    }
+  };
+  img.src = URL.createObjectURL(blob);
+}
+openBtn.addEventListener("click", () => lastUrl && window.open(lastUrl, "_blank"));
+</script>
+</body>
+</html>

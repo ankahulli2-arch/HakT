@@ -50,9 +50,19 @@ async def profile_pdf(profile=Depends(get_candidate_profile), db=Depends(get_db)
     from app.api.routes.interaction import candidate_metrics_data
     metrics = await candidate_metrics_data(db, profile)
 
+    verify_url = None
+    if profile.grade is not None and profile.specialization_code:
+        from app.core.config import settings
+        from app.core.security import sign_category
+        from app.services.scoring import final_score
+        score = final_score(profile.theta, profile.integrity)
+        signature = sign_category(str(profile.user_id), profile.specialization_code,
+                                  profile.grade.value, score)
+        verify_url = f"{settings.frontend_url}/verify/{profile.user_id}/{signature}"
+
     os.makedirs("media/pdf", exist_ok=True)
     path = f"media/pdf/{profile.user_id}.pdf"
-    generate_profile_pdf(profile, metrics, history, path)
+    generate_profile_pdf(profile, metrics, history, path, verify_url)
     return FileResponse(path, filename="profile.pdf")
 
 

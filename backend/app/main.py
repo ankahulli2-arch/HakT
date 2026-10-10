@@ -23,6 +23,8 @@ from app.api.routes import (
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    from app.api.routes.admin import restore_demo_media
+    restore_demo_media()
     yield
 
 def create_app() -> FastAPI:

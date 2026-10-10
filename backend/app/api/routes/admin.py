@@ -130,6 +130,22 @@ ELLE_SUMMARY = ("ML-инженер с практическим опытом ра
                 "задачи и доводить проекты до результата.")
 
 
+def restore_demo_media() -> None:
+    """Возвращает демо-аватары после пересоздания контейнера: media не в томе,
+    а повторный seed при живой базе не запускается."""
+    media = "media/avatars"
+    os.makedirs(media, exist_ok=True)
+    assets = Path(__file__).resolve().parent.parent.parent / "assets"
+    for email, fname in (
+        ("techlog@techlogistics.ru", "it_logo.jpg"),
+        ("demo_cand_050@example.ru", "elle_photo.jpg"),
+    ):
+        uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, email))
+        src = assets / fname
+        if src.is_file():
+            shutil.copyfile(src, os.path.join(media, f"{uid}.jpg"))
+
+
 @router.post("/seed", summary="Наполнить базу демо-данными (reset=true — полный сброс для жюри)")
 async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
     if reset:
@@ -275,15 +291,7 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
         await db.flush()
 
     await db.flush()
-    assets = Path(__file__).resolve().parent.parent.parent / "assets"
-    os.makedirs("media/avatars", exist_ok=True)
-    for uid, fname in (
-        (str(uuid.uuid5(uuid.NAMESPACE_DNS, employers_data[0][0])), "it_logo.jpg"),
-        (str(uuid.uuid5(uuid.NAMESPACE_DNS, "demo_cand_050@example.ru")), "elle_photo.jpg"),
-    ):
-        src = assets / fname
-        if src.exists():
-            shutil.copyfile(src, os.path.join("media", "avatars", f"{uid}.jpg"))
+    restore_demo_media()
     from app.core.redisio import client as redis_client
     from app.models import Application, Grade, Invitation, InteractionStatus, TestSession, TestStatus
     techlog = employer_ids[0]

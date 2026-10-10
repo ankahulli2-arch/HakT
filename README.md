@@ -23,17 +23,13 @@ auth, profiles (PDF-сертификат), testing (IRT/CAT, банк, конс�
 
 ## Как это выглядит
 
-| Кабинет кандидата | Кабинет работодателя |
-|---|---|
-| ![кандидат](png/ui_cand_lk.png) | ![работодатель](png/ui_emp_lk.png) |
+| Кабинет кандидата и кабинет работодателя |
+|---|
+| ![кабинеты](png/ui_elle_lk.png) |
 
-| Подборка работодателя | Топ категории |
+| Подборка работодателя | Выбор роли |
 |---|---|
-| ![подборка](png/ui_shortlist.png) | ![лидерборд](png/ui_leaderboard.png) |
-
-| Проверка сертификата по QR | Воронка найма |
-|---|---|
-| ![verify](png/ui_verify_valid.png) | ![воронка](png/ui_funnel.png) |
+| ![подборка](png/ui_shortlist.png) | ![роли](png/ui_roles.png) |
 
 ## Запуск
 
@@ -233,6 +229,7 @@ backend/
   scripts/e2e_smoke.py   сквозная проверка (36 проверок)
 frontend/              Next.js + Tailwind: лендинг, два кабинета, /verify
 png/                   скриншоты и иллюстрации для репозитория
+tools/qr_check.html    офлайн-декодер QR-кода для демонстрации проверки
 docs/                  сырые результаты бенчмарков (benchmark_*.json)
 docker-compose.yml     postgres (pgvector) · redis · api · frontend
 inst.txt               пошаговая инструкция по файлам и запуску
