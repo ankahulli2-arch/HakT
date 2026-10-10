@@ -213,11 +213,11 @@ function TopCard() {
   return (
     <Card>
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-[#3b1f5e]">Топ категории</h3>
           <p className="mt-1 text-xs text-gray-500">Живой рейтинг по итогам CAT-тестов — кого звать на собеседование</p>
         </div>
-        <select className={`${inputCls} w-auto shrink-0`} value={spec} onChange={(e) => setSpec(e.target.value)}>
+        <select className={`${inputCls} !w-48 min-w-0 shrink-0`} value={spec} onChange={(e) => setSpec(e.target.value)}>
           {specs.map((s: any) => <option key={s.code} value={s.code}>{s.name}</option>)}
         </select>
       </div>
