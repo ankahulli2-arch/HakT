@@ -60,7 +60,7 @@ async def profile_pdf(profile=Depends(get_candidate_profile), db=Depends(get_db)
 async def certificate_pdf(profile=Depends(get_candidate_profile), db=Depends(get_db)):
     from app.models import Specialization
     from app.services.pdf import generate_certificate_pdf
-    from app.services.scoring import theta_to_score
+    from app.services.scoring import final_score
     from app.core.config import settings
     from app.core.security import sign_category
 
@@ -68,7 +68,7 @@ async def certificate_pdf(profile=Depends(get_candidate_profile), db=Depends(get
         raise HTTPException(400, "Сначала пройдите тестирование")
 
     spec = await db.get(Specialization, profile.specialization_code)
-    score = theta_to_score(profile.theta if profile.theta is not None else 0.0)
+    score = final_score(profile.theta, profile.integrity)
     grade = profile.grade.value
     signature = sign_category(str(profile.user_id), profile.specialization_code, grade, score)
     verify_url = f"{settings.frontend_url}/verify/{profile.user_id}/{signature}"
@@ -85,14 +85,14 @@ async def certificate_pdf(profile=Depends(get_candidate_profile), db=Depends(get
 @router.get("/verify/{user_id}/{signature}", summary="Публичная проверка подлинности категории по QR")
 async def verify_certificate(user_id: str, signature: str, db=Depends(get_db)):
     from app.models import Specialization
-    from app.services.scoring import theta_to_score
+    from app.services.scoring import final_score
     from app.core.security import verify_category_signature
 
     profile = await db.get(CandidateProfile, user_id)
     if profile is None or profile.grade is None or not profile.specialization_code:
         return {"valid": False, "reason": "Проверка не найдена"}
 
-    score = theta_to_score(profile.theta if profile.theta is not None else 0.0)
+    score = final_score(profile.theta, profile.integrity)
     valid = verify_category_signature(
         str(user_id), profile.specialization_code, profile.grade.value, score, signature)
     if not valid:

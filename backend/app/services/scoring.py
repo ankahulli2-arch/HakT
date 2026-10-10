@@ -35,6 +35,13 @@ def theta_to_score(theta: float) -> int:
     return int(round(100.0 / (1.0 + math.exp(-theta))))
 
 
+def final_score(theta: float | None, integrity: float | None) -> int:
+    """Балл 0–100: 90 за задания (по θ) + 10 за честность сессии."""
+    base = theta_to_score(theta if theta is not None else 0.0)
+    honest = 1.0 if integrity is None else max(0.0, min(1.0, integrity))
+    return int(round(base * 0.9 + honest * 10))
+
+
 def fsp_index(history: list | None) -> float:
     if not history:
         return 0.0

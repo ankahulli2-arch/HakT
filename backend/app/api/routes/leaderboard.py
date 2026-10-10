@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_db
 from app.core.redisio import client as redis_client
 from app.models import CandidateProfile
-from app.services.scoring import theta_to_score
+from app.services.scoring import theta_to_score, final_score
 
 router = APIRouter(prefix="/leaderboard", tags=["leaderboard"])
 
@@ -28,6 +28,6 @@ async def leaderboard(specialization_code: str, limit: int = 10,
             "name": first,
             "grade": profile.grade.value,
             "theta": round(theta, 2),
-            "score": theta_to_score(theta),
+            "score": final_score(theta, profile.integrity),
         })
     return {"specialization": specialization_code, "items": items}

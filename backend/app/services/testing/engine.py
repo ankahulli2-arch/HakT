@@ -18,7 +18,7 @@ from app.models import (
     TestSession,
     TestStatus,
 )
-from app.services.scoring import theta_to_grade, theta_to_score
+from app.services.scoring import theta_to_grade, theta_to_score, final_score
 from app.core.redisio import client as redis_client
 from app.services.testing.blueprint import blueprint_pool
 
@@ -333,7 +333,7 @@ def sessions_history(sessions) -> list[dict]:
     for s in sessions:
         groups.setdefault(s.specialization_code, []).append({
             "date": s.finished_at.isoformat()[:10] if s.finished_at else None,
-            "score": theta_to_score(s.theta),
+            "score": final_score(s.theta, s.integrity),
             "grade": s.measured_grade.value if s.measured_grade else None,
             "integrity": round(s.integrity, 2),
         })
@@ -617,5 +617,5 @@ async def finish_session(db: AsyncSession, session: TestSession) -> dict:
             if session.integrity < 1.0 else None
         ),
         "best_note": best_note,
-        "score": theta_to_score(session.theta),
+        "score": final_score(session.theta, session.integrity),
     }

@@ -262,12 +262,21 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
     db.add(TestSession(
         candidate_id=demo_ids[1], specialization_code="backend",
         target_grade=Grade.junior, is_initial=True, status=TestStatus.completed,
-        theta=-2.0, se=0.42, administered=[], measured_grade=Grade.junior,
+        theta=-2.75, se=0.42, administered=[], measured_grade=Grade.junior,
         integrity=0.7, started_at=now - timedelta(hours=30), finished_at=now - timedelta(hours=29),
     ))
     await db.flush()
 
     cats = (await db.execute(select(CandidateCategory))).scalars().all()
+    dev = sorted((c for c in cats if c.specialization_code == "devops"),
+                 key=lambda c: -c.theta)
+    for row, theta in zip(dev, (2.31, 2.20)):
+        row.theta = theta
+        prof = await db.get(CandidateProfile, row.candidate_id)
+        if prof is not None:
+            prof.theta = theta
+            prof.theta_history = [theta]
+    await db.flush()
     board: dict[str, dict[str, float]] = {}
     for c in cats:
         board.setdefault(c.specialization_code, {})[str(c.candidate_id)] = float(c.theta)

@@ -27,7 +27,7 @@ from app.models import (
     Vacancy,
 )
 from app.schemas import InvitationIn, VacancyIn, VacancyOut
-from app.services.scoring import build_shortlist, category_ru, theta_to_score
+from app.services.scoring import build_shortlist, category_ru, theta_to_score, final_score
 from app.services.testing import engine
 
 INVITE_TTL_DAYS = 14
@@ -419,7 +419,7 @@ async def employer_candidate_view(candidate_id: str, employer=Depends(get_employ
         "categories": [
             {"specialization": x.specialization_code, "grade": x.grade.value,
              "category": category_ru(spec_names.get(x.specialization_code, x.specialization_code), x.grade.value),
-             "score": theta_to_score(x.theta)}
+             "score": final_score(x.theta, c.integrity)}
             for x in cats
         ],
         "history": [
@@ -534,7 +534,7 @@ async def candidate_metrics_data(db, candidate) -> list[dict]:
             "specialization": cat.specialization_code,
             "grade": cat.grade.value,
             "category": f"{cat.specialization_code} · {cat.grade.value}",
-            "score": theta_to_score(cat.theta),
+            "score": final_score(cat.theta, candidate.integrity),
             "rank": (total - lower) if total else 1,
             "total": total,
             "candidates_in_category": total,
