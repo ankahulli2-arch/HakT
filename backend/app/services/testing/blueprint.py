@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import EmployerCustomItem, ItemTemplate, Specialization, TestBlueprint
-from app.services.testing.scenarios import SCENARIOS
+from app.services.testing.scenarios import SCENARIOS, SKILLS_CATALOG
 
 SEARCH_TIMEOUT = 6.0
 KNOWLEDGE_BASE: dict[str, list[str]] = {
@@ -112,8 +112,8 @@ async def make_draft(
     return bp
 
 
-def _autodistractors(correct: str, rng: random.Random) -> list[str]:
-    """Дистракторы для своего вопроса: числа ±, даты-годы, иначе пусто."""
+def _autodistractors(correct: str, rng: random.Random, spec_code: str = "") -> list[str]:
+    """Дистракторы для своего вопроса: числа ±, годы, да/нет, иначе словарь предметной области."""
     t = correct.strip()
     if re.fullmatch(r"-?\d+([.,]\d+)?", t):
         try:
@@ -131,7 +131,14 @@ def _autodistractors(correct: str, rng: random.Random) -> list[str]:
     if re.fullmatch(r"(19|20)\d{2}", t):
         y = int(t)
         return [str(y + d) for d in rng.sample([-2, -1, 1, 2], 3)]
-    return []
+    if re.fullmatch(r"(да|нет|yes|no|истина|ложь)", t, re.I):
+        pool = ["да", "нет", "истина", "ложь"]
+        return [p for p in pool if p != t.lower()][:3]
+    pool = [p for p in KNOWLEDGE_BASE.get(spec_code, []) if p.lower() != t.lower()]
+    if len(pool) < 3:
+        pool += [w for w in SKILLS_CATALOG if w not in pool and w.lower() != t.lower()]
+    rng.shuffle(pool)
+    return pool[:3]
 
 
 async def replace_items(db: AsyncSession, bp: TestBlueprint, items: list[dict]) -> TestBlueprint:
@@ -144,15 +151,20 @@ async def add_custom_item(
     db: AsyncSession, bp: TestBlueprint, title: str, body: str,
     options: list[str], correct: str,
 ) -> dict:
+    rng = random.Random(f"{title}:{correct}")
     options = [o for o in options if o.strip()]
     if correct not in options:
         options.append(correct)
     if len(options) < 4:
-        rng = random.Random()
-        for d in _autodistractors(correct, rng):
+        have = {o.strip().lower() for o in options}
+        for d in _autodistractors(correct, rng, bp.specialization_code):
             if len(options) >= 4:
                 break
+            if d.strip().lower() in have or d == correct:
+                continue
             options.append(d)
+            have.add(d.strip().lower())
+    rng.shuffle(options)
     custom = EmployerCustomItem(
         employer_id=bp.employer_id,
         title=title, body=body,

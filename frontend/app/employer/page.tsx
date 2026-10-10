@@ -623,10 +623,10 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
   const [skillsFound, setSkillsFound] = useState<any[]>(blueprint?.researched_skills || []);
   const [status, setStatus] = useState(blueprint ? normStatus(blueprint.status) : "нет теста");
   const [bid, setBid] = useState(blueprint?.id || null);
-  const [custom, setCustom] = useState({ title: "", body: "", options: "", correct: "" });
+  const [custom, setCustom] = useState({ title: "", body: "", correct: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [seen, setSeen] = useState(false);
+  const [open, setOpen] = useState<string | null>(null);
   const started = useRef(false);
 
   const build = async () => {
@@ -639,18 +639,26 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
         vacancy_id: vacancy.id,
         code_language: vacancy.code_language || "python",
       });
-      setItems(r.items); setSkillsFound(r.researched_skills);
-      setBid(r.blueprint_id); setStatus(normStatus(r.status) || "draft");
+      const fresh = await GET(`/employer/tests/${r.blueprint_id}`);
+      setItems(fresh.items || []); setSkillsFound(fresh.researched_skills || []);
+      setBid(r.blueprint_id); setStatus(normStatus(fresh.status) || "draft");
     } catch (e: any) { setErr(e.message); }
     finally { setBusy(false); }
   };
 
   useEffect(() => {
-    if (bid || started.current) return;
+    if (started.current) return;
     started.current = true;
     (async () => {
       setBusy(true); setErr("");
       try {
+        if (bid) {
+          const fresh = await GET(`/employer/tests/${bid}`);
+          setItems(fresh.items || []);
+          setSkillsFound(fresh.researched_skills || skillsFound);
+          if (fresh.status) setStatus(normStatus(fresh.status));
+          return;
+        }
         const existing = (allBlueprints || []).find((b: any) =>
           (b.vacancy_id === vacancy.id || b.specialization_code === vacancy.specialization_code) &&
           normStatus(b.status) === "draft");
@@ -678,13 +686,25 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
     catch (e: any) { setErr(e.message); }
   };
 
+  const toggleItem = async (ref: string) => {
+    const next = open === ref ? null : ref;
+    setOpen(next);
+    if (!next || !bid) return;
+    const cur = items.find((i: any) => i.ref_id === ref);
+    if (cur && !cur.sample) {
+      try {
+        const fresh = await GET(`/employer/tests/${bid}`);
+        setItems(fresh.items || []);
+      } catch (e: any) { setErr(e.message); }
+    }
+  };
+
   const addCustom = async () => {
     try {
-      const opts = custom.options.split("\n").map((s: string) => s.trim()).filter(Boolean);
       await POST(`/employer/tests/${bid}/items`, {
-        title: custom.title, body: custom.body, options: opts, correct: custom.correct,
+        title: custom.title, body: custom.body, options: [], correct: custom.correct,
       });
-      setCustom({ title: "", body: "", options: "", correct: "" });
+      setCustom({ title: "", body: "", correct: "" });
       await reloadItems();
     } catch (e: any) { setErr(e.message); }
   };
@@ -719,26 +739,34 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
       <div className="mt-2 space-y-1.5 text-sm">
         {items.map((it: any) => (
           <div key={it.ref_id} className="rounded-lg bg-white px-3 py-2">
-            <div className="flex items-center justify-between">
+            <div className="flex cursor-pointer items-center justify-between" onClick={() => toggleItem(it.ref_id)}>
               <span className="font-medium text-[#3b1f5e]">
                 <Badge tone={it.source === "custom" ? "green" : "purple"}>{it.source === "custom" ? "ваш" : "банк"}</Badge>{" "}
                 {it.title}
               </span>
-              <button className="text-xs text-red-500 shrink-0" onClick={() => removeItem(it.ref_id)}>удалить</button>
+              <span className="flex shrink-0 items-center gap-2">
+                <span className="text-[10px] text-[#5e2b8e]">{open === it.ref_id ? "▲ свернуть" : "▼ посмотреть"}</span>
+                <button className="text-xs text-red-500"
+                  onClick={(e) => { e.stopPropagation(); removeItem(it.ref_id); }}>удалить</button>
+              </span>
             </div>
-            {it.sample?.body && (
-              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap font-mono text-xs text-gray-700">{it.sample.body}</pre>
-            )}
-            {it.sample?.options ? (
-              <ul className="mt-1 grid gap-0.5 text-xs">
-                {it.sample.options.map((o: string, i: number) => (
-                  <li key={i} className={o === it.sample.answer ? "font-semibold text-green-700" : "text-gray-600"}>
-                    {o === it.sample.answer ? "✓ " : "• "}{o}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              it.sample?.answer && <p className="mt-1 text-xs text-gray-600">верный ответ: <b>{it.sample.answer}</b></p>
+            {open === it.ref_id && (
+              <div className="mt-1 rounded-lg bg-[#f6f1fc] p-2">
+                {it.sample?.body && (
+                  <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs text-gray-700">{it.sample.body}</pre>
+                )}
+                {it.sample?.options ? (
+                  <ul className="mt-1 grid gap-0.5 text-xs">
+                    {it.sample.options.map((o: string, i: number) => (
+                      <li key={i} className={o === it.sample.answer ? "font-semibold text-green-700" : "text-gray-600"}>
+                        {o === it.sample.answer ? "✓ " : "• "}{o}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  it.sample?.answer && <p className="mt-1 text-xs text-gray-600">верный ответ: <b>{it.sample.answer}</b></p>
+                )}
+              </div>
             )}
           </div>
         ))}
@@ -750,26 +778,15 @@ function DraftEditor({ vacancy, blueprint, allBlueprints, skills, onSaved }: any
             onChange={(e) => setCustom({ ...custom, title: e.target.value })} />
           <textarea className={inputCls} rows={2} placeholder="Текст вопроса" value={custom.body}
             onChange={(e) => setCustom({ ...custom, body: e.target.value })} />
-          <textarea className={inputCls} rows={2} placeholder="Варианты (по одному на строку; пусто — свободный ответ)"
-            value={custom.options} onChange={(e) => setCustom({ ...custom, options: e.target.value })} />
-          <input className={inputCls} placeholder="Верный ответ" value={custom.correct}
+          <input className={inputCls} placeholder="Верный ответ — три неправильных варианта сгенерируем сами" value={custom.correct}
             onChange={(e) => setCustom({ ...custom, correct: e.target.value })} />
           <Button onClick={addCustom} disabled={!custom.title || !custom.body || !custom.correct}>Добавить</Button>
         </div>
       </div>
       <div className="mt-2">
-        {status !== "published" && items.length > 0 && (
-          <label className="mb-2 flex items-center gap-2 text-sm text-gray-700">
-            <input type="checkbox" className="accent-[#5e2b8e]" checked={seen} onChange={(e) => setSeen(e.target.checked)} />
-            Я посмотрел примеры вопросов
-          </label>
-        )}
-        <Button onClick={publish} disabled={status === "published" || items.length === 0 || !seen}>
+        <Button onClick={publish} disabled={status === "published" || items.length === 0}>
           {status === "published" ? "Тест опубликован" : "Опубликовать тест"}
         </Button>
-        {status !== "published" && items.length > 0 && !seen && (
-          <p className="mt-1 text-xs text-gray-400">пока галочка не стоит — публикация заблокирована</p>
-        )}
       </div>
     </div>
   );
