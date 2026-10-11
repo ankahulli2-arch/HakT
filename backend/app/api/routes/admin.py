@@ -319,6 +319,33 @@ async def seed(reset: bool = False, db: AsyncSession = Depends(get_db)):
             created_at=now - timedelta(hours=rng.randint(55, 140)),
         ))
     await db.flush()
+    # История Элки: её вакансия у «АйтиЛайт», отклик с сопроводительным и
+    # приглашение работодателя — переживают любой reset вместе с сидом.
+    elle_uid = str(uuid.uuid5(uuid.NAMESPACE_DNS, "demo_cand_050@example.ru"))
+    elle_vac = Vacancy(employer_id=techlog, title="ML-инженер (компьютерное зрение)",
+                       description="Производственная команда ИТ: модели распознавания"
+                                   " дефектов на производственных линиях. Нужен уверенный"
+                                   " ML с практическим опытом: полный цикл от датасета до"
+                                   " продакшена.",
+                       specialization_code="ml", min_grade="senior",
+                       stack=["python", "pytorch", "opencv", "машинное обучение", "sql"],
+                       code_language="python", salary_min=220000, salary_max=320000)
+    db.add(elle_vac)
+    await db.flush()
+    vi += 1
+    db.add(Application(candidate_id=elle_uid, vacancy_id=elle_vac.id,
+                       cover_letter="Опыт в компьютерном зрении: собрала датасеты,"
+                                    " обучила и деплоила модели распознавания дефектов"
+                                    " в продакшен."))
+    db.add(Invitation(
+        employer_id=techlog, candidate_id=elle_uid, vacancy_id=elle_vac.id,
+        message="Посмотрите нашу вакансию ML-инженера — ваш профиль точно"
+                " подходит, обсудим задачи на созвоне.",
+        salary_min=240000, salary_max=330000, status=InteractionStatus.viewed,
+        decided_at=now - timedelta(hours=20),
+        created_at=now - timedelta(hours=26),
+    ))
+    await db.flush()
     db.add(TestSession(
         candidate_id=demo_ids[1], specialization_code="backend",
         target_grade=Grade.junior, is_initial=True, status=TestStatus.completed,
