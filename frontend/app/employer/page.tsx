@@ -523,7 +523,7 @@ function VacanciesStep({ specs, setSpecs, skills, onDone }: any) {
     <>
       <Card>
         <h3 className="font-semibold text-[#3b1f5e]">Выберите направления</h3>
-        <p className="text-xs text-gray-400">Можно несколько; детали — зарплата, грейд, навыки — по желанию</p>
+        <p className="text-xs text-gray-400">Можно несколько; детали — зарплата, уровень, навыки — по желанию</p>
         <div className="mt-3 flex flex-wrap gap-1.5 mb-2">
           {Object.entries(selected).filter(([, v]: any) => v).map(([code]: any) => {
             const s = specs.find((x: any) => x.code === code);
@@ -571,7 +571,7 @@ function VacanciesStep({ specs, setSpecs, skills, onDone }: any) {
                     onChange={(e) => setParam(code, "salary_max", e.target.value)} />
                 </Field>
               </div>
-              <Field label="Минимальный грейд">
+              <Field label="Минимальный уровень">
                 <select className={inputCls} value={v.min_grade}
                   onChange={(e) => setParam(code, "min_grade", e.target.value)}>
                   {Object.entries(GRADE_RU).map(([k, ru]) => <option key={k} value={k}>{ru}</option>)}
@@ -1019,7 +1019,7 @@ function VacancyForm({ form, setForm, skills, onDone }: any) {
               onChange={(e) => setForm({ ...form, salary_max: Number(e.target.value) })} />
           </Field>
         </div>
-        <Field label="Минимальный грейд">
+        <Field label="Минимальный уровень">
           <select className={inputCls} value={form.min_grade}
             onChange={(e) => setForm({ ...form, min_grade: e.target.value })}>
             {Object.entries(GRADE_RU).map(([k, ru]) => <option key={k} value={k}>{ru}</option>)}

@@ -584,7 +584,7 @@ async def evaluate(body: dict, k: int = 10, db=Depends(get_db)):
         try:
             min_grade = Grade(pair["min_grade"]) if pair.get("min_grade") else None
         except ValueError:
-            raise HTTPException(422, f"Неизвестный грейд: {pair['min_grade']}")
+            raise HTTPException(422, f"Неизвестный уровень: {pair['min_grade']}")
         need = EmployerNeed(
             employer_id="benchmark",
             raw_text=pair.get("need", ""),

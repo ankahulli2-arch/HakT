@@ -63,7 +63,7 @@ async def list_specializations(db: AsyncSession = Depends(get_db)):
         for s in rows
     ]
 
-@router.post("/testing/survey", summary="Опрос: специализация + заявленный грейд → старт теста")
+@router.post("/testing/survey", summary="Опрос: специализация + заявленный уровень, старт теста")
 async def survey(body: SurveyIn, candidate=Depends(get_candidate_profile), db=Depends(get_db)):
     spec = await db.get(Specialization, body.specialization_code)
     if spec is None:
@@ -121,7 +121,7 @@ async def start_by_invitation(invitation_id: str, target_grade: str = "junior",
     try:
         grade = Grade(target_grade)
     except ValueError:
-        raise HTTPException(422, "Неизвестный грейд")
+        raise HTTPException(422, "Неизвестный уровень")
     session = await engine.start_session(
         db, candidate, bp.specialization_code, grade, is_initial=False,
         blueprint_id=inv.blueprint_id, code_language=bp.code_language,
@@ -148,7 +148,7 @@ async def test_history(candidate=Depends(get_candidate_profile), db=Depends(get_
             for g in engine.sessions_history(rows)]
 
 
-@router.get("/testing/status", summary="Текущий статус: категории, грейды, история")
+@router.get("/testing/status", summary="Текущий статус: категории, уровни, история")
 async def status(candidate=Depends(get_candidate_profile), db=Depends(get_db)):
     from app.models import Specialization
     from app.services.scoring import category_ru

@@ -62,7 +62,7 @@ export default function Landing() {
       <Card className="w-full max-w-xl">
         <h1 className="text-xl font-bold text-[#3b1f5e]">Платформа подбора ИТ-специалистов ФСП</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Обратная механика: кандидат подтверждает грейд тестом, работодатель приглашает первым.
+          Обратная механика: кандидат подтверждает уровень тестом, работодатель приглашает первым.
         </p>
 
         {stage === "creds" ? (

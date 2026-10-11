@@ -328,7 +328,7 @@ GENERATORS = {
 
 
 def sessions_history(sessions) -> list[dict]:
-    """История попыток по направлениям: балл, грейд, честность; лучший балл."""
+    """История попыток по направлениям: балл, уровень, честность; лучший балл."""
     groups: dict[str, list] = {}
     for s in sessions:
         groups.setdefault(s.specialization_code, []).append({
@@ -547,11 +547,17 @@ async def finish_session(db: AsyncSession, session: TestSession) -> dict:
             and datetime.now(timezone.utc) - candidate.last_grade_change_at
             < timedelta(days=settings.grade_change_cooldown_days)
         )
-        if rising and applied != candidate.grade and in_cooldown:
+        # Явный скачок способности (заметно выше разброса измерений) — повышение без ожидания:
+        # случайной удачей такой запас не набрать, а проспавший сильный кандидат пройдёт.
+        se_prev = candidate.theta_se or 0.4
+        se_now = session.se or 0.4
+        jump_ok = candidate.theta is None or session.theta >= (
+            candidate.theta + 2.0 * (se_prev ** 2 + se_now ** 2) ** 0.5)
+        if rising and applied != candidate.grade and in_cooldown and not jump_ok:
             applied = candidate.grade
             cooldown_note = (
-                f"Повышение грейда доступно не чаще раза в "
-                f"{settings.grade_change_cooldown_days} дней. Зафиксирован грейд "
+                f"Повышение уровня доступно не чаще раза в "
+                f"{settings.grade_change_cooldown_days} дней. Зафиксирован уровень "
                 f"{candidate.grade.value}."
             )
 

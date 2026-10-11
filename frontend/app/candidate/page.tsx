@@ -741,7 +741,7 @@ function TestTab({ profile, specs, onDone, startInvitation, onInvitationHandled 
             сколько угодно, категорию подтверждает лучшая.
           </div>
           <p className="mt-1 text-xs text-gray-400">
-            Опрос определяет специализацию, тест — грейд. Результат присваивает категорию, видимую работодателям.
+            Опрос определяет специализацию, тест — уровень. Результат присваивает категорию, видимую работодателям.
             Можно получить категорию в нескольких направлениях — по одному на каждое.
           </p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -752,7 +752,7 @@ function TestTab({ profile, specs, onDone, startInvitation, onInvitationHandled 
                 {specs?.map((s: any) => <option key={s.code} value={s.code}>{s.name}</option>)}
               </select>
             </Field>
-            <Field label="Заявленный грейд">
+            <Field label="Заявленный уровень">
               <select className={inputCls} value={grade} onChange={(e) => setGrade(e.target.value)}>
                 <option value="junior">Junior</option>
                 <option value="middle">Middle</option>
@@ -845,7 +845,7 @@ function TestTab({ profile, specs, onDone, startInvitation, onInvitationHandled 
           </div>
           {thetaPts.length > 0 && <ThetaChart pts={thetaPts} />}
           {result.measured_grade !== result.applied_grade && (
-            <p className="mt-2 text-sm text-amber-600">Измеренный грейд: {GRADE_TITLE[result.measured_grade] || result.measured_grade}</p>
+            <p className="mt-2 text-sm text-amber-600">Измеренный уровень: {GRADE_TITLE[result.measured_grade] || result.measured_grade}</p>
           )}
           {result.cooldown_note && <p className="mt-2 text-sm text-amber-600">{result.cooldown_note}</p>}
           {result.integrity_note && <p className="mt-2 text-sm text-amber-600">{result.integrity_note}</p>}

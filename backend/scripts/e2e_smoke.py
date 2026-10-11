@@ -61,7 +61,7 @@ while True:
     if answers > 25:
         break
 step(f"адаптивный тест завершён ({answers} заданий)", r.json().get("finished") is True,
-     f"θ={r.json().get('theta')}, грейд={r.json().get('applied_grade')}")
+     f"θ={r.json().get('theta')}, уровень={r.json().get('applied_grade')}")
 
 r = c.get(f"{BASE}/testing/status", headers=H)
 step("категория присвоена", r.json().get("category") is not None, r.json().get("category", ""))

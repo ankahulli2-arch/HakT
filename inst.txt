@@ -15,7 +15,7 @@
   app/main.py               сборка приложения: все роутеры, middleware коммита БД,
                             автосоздание таблиц при старте
   app/core/config.py        настройки (env): DATABASE_URL, SECRET_KEY, FRONTEND_URL,
-                            грейд-cooldown 90 дней, параметры CAT (12 заданий, SE ≤ 0.30)
+                            cooldown уровня 90 дней, параметры CAT (12 заданий, SE ≤ 0.30)
   app/core/db.py            подключение к БД + middleware: коммит до отправки ответа
   app/core/security.py      bcrypt-хэш паролей, JWT (access/refresh), код подтверждения,
                             подпись категории для сертификата (HMAC-SHA256)
@@ -45,7 +45,7 @@
   app/api/routes/health.py          /health для docker healthcheck
   app/services/testing/engine.py    IRT 3PL, EAP-оценка θ, выбор задания CAT,
                                     генераторы вариантов (уникален при каждой выдаче),
-                                    тест-сессии, категория, cooldown грейда, ZADD в лидерборд
+                                    тест-сессии, категория, cooldown уровня, ZADD в лидерборд
   app/services/testing/scenarios.py сценарии вакансий (8 специализаций) → банк заданий
   app/services/testing/blueprint.py черновик теста: поиск навыков в интернете (DuckDuckGo),
                                     автосборка, свои вопросы, публикация
